@@ -1,0 +1,9 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/tnhlabsc/Property-Site-Scrapper
+    - /bin/cp -R PropertyScrapper $DEPLOYPATH
+    - /bin/cp -R scrapper $DEPLOYPATH
+    - /bin/cp manage.py $DEPLOYPATH
+    - /bin/cp run_spider.py $DEPLOYPATH
+    - /bin/cp requirements.txt $DEPLOYPATH
