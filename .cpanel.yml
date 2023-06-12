@@ -1,7 +1,7 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/tnhlabsc/Property-Site-Scrapper
+    - export DEPLOYPATH=/home/tnhlabsc/Property-Site-Scrapper/
     - /bin/cp -R PropertyScrapper $DEPLOYPATH
     - /bin/cp -R scrapper $DEPLOYPATH
     - /bin/cp manage.py $DEPLOYPATH
