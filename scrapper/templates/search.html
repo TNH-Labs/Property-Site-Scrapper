@@ -1,0 +1,126 @@
+<!-- search.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search</title>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const searchTypeSelect = document.getElementById('search-type');
+            const propertyTypeForLeaseInput = document.getElementById('propertytypeforlease');
+            const propertyTypeForSaleInput = document.getElementById('propertytypeforsale');
+            const propertyTypeBBSInput = document.getElementById('propertytypeBBS');
+            const propertyTypeForLeaseOptions = ["Office", "Coworking", "Industrial", "Retail", "Restaurant", "Flex", "Medical", "Land"];
+            const propertyTypeForSaleOptions = ["Office", "Industrial", "Retail", "Restaurant", "Shopping Center", "Multifamily", "Specialty", "Health Care", "Hospitality", "Sports & Entertainment", "Land", "Residential Income"];
+            const propertyTypeBBSCategories = ["Popular Industries", "Restaurants & Food", "Retail", "Service Businesses", "Wholesale & Distributors", "Transportation & Storage", "Online & Technology", "Automotive & Boat", "Franchise Opportunities", "All Industries"];
+
+            function handleSearchTypeChange() {
+                const selectedValue = searchTypeSelect.value;
+
+                propertyTypeForLeaseInput.style.display = selectedValue === 'forLease' ? 'block' : 'none';
+                propertyTypeForSaleInput.style.display = selectedValue === 'forSale' ? 'block' : 'none';
+                propertyTypeBBSInput.style.display = selectedValue === 'BBSType' ? 'block' : 'none';
+            }
+
+            function validateInput(event) {
+                const selectedValue = searchTypeSelect.value;
+
+                if (selectedValue === 'forLease') {
+                    const userInput = propertyTypeForLeaseInput.value;
+                    const matchingOption = propertyTypeForLeaseOptions.find(option => option.toLowerCase() === userInput.toLowerCase());
+                    if (matchingOption) {
+                        propertyTypeForLeaseInput.value = matchingOption;
+                    }
+                } else if (selectedValue === 'forSale') {
+                    const userInput = propertyTypeForSaleInput.value;
+                    const matchingOption = propertyTypeForSaleOptions.find(option => option.toLowerCase() === userInput.toLowerCase());
+                    if (matchingOption) {
+                        propertyTypeForSaleInput.value = matchingOption;
+                    }
+                } else if (selectedValue === 'BBSType') {
+                    const userInput = propertyTypeBBSInput.value;
+                    const matchingOption = propertyTypeBBSCategories.find(option => option.toLowerCase() === userInput.toLowerCase());
+                    if (matchingOption) {
+                        propertyTypeBBSInput.value = matchingOption;
+                    }
+                }
+
+                return true; // Submit the form
+            }
+
+            searchTypeSelect.addEventListener('change', handleSearchTypeChange);
+            handleSearchTypeChange();
+
+            document.getElementById('search-form').addEventListener('submit', validateInput);
+
+            // Clear the input fields on focus
+            propertyTypeForLeaseInput.addEventListener('focus', clearInput);
+            propertyTypeForSaleInput.addEventListener('focus', clearInput);
+            propertyTypeBBSInput.addEventListener('focus', clearInput);
+
+            function clearInput(event) {
+                event.target.value = '';
+            }
+
+            // Update the input fields on change
+            propertyTypeForLeaseInput.addEventListener('change', updateInput);
+            propertyTypeForSaleInput.addEventListener('change', updateInput);
+            propertyTypeBBSInput.addEventListener('change', updateInput);
+
+            function updateInput(event) {
+                const selectedValue = searchTypeSelect.value;
+                const userInput = event.target.value;
+
+                if (selectedValue === 'forLease') {
+                    const matchingOption = propertyTypeForLeaseOptions.find(option => option.toLowerCase() === userInput.toLowerCase());
+                    if (matchingOption) {
+                        event.target.value = matchingOption;
+                    }
+                } else if (selectedValue === 'forSale') {
+                    const matchingOption = propertyTypeForSaleOptions.find(option => option.toLowerCase() === userInput.toLowerCase());
+                    if (matchingOption) {
+                        event.target.value = matchingOption;
+                    }
+                } else if (selectedValue === 'BBSType') {
+                    const matchingOption = propertyTypeBBSCategories.find(option => option.toLowerCase() === userInput.toLowerCase());
+                    if (matchingOption) {
+                        event.target.value = matchingOption;
+                    }
+                }
+            }
+        });
+    </script>
+</head>
+<body>
+    <h1>Search</h1>
+
+    <form id="search-form" method="POST" action="{% url 'scrapper:search_results' %}">
+        {% csrf_token %}
+
+        <label for="search-type">Search Type:</label>
+        <select id="search-type" name="search-type">
+            <option value="forLease">Lease</option>
+            <option value="forSale">Sale</option>
+            <option value="auction">Auctions</option>
+            <option value="BBSType">Business</option>
+        </select>
+
+        <label for="propertytypeforlease" id="propertytypeforlease-label" style="display: none;">Property Name:</label>
+        <input type="text" id="propertytypeforlease" name="propertytypeforlease" style="display: none;">
+
+        <label for="propertytypeforsale" id="propertytypeforsale-label" style="display: none;">Property Name:</label>
+        <input type="text" id="propertytypeforsale" name="propertytypeforsale" style="display: none;">
+
+        <label for="propertytypeBBS" id="propertytypeBBS-label" style="display: none;">Category:</label>
+        <input type="text" id="propertytypeBBS" name="propertytypeBBS" style="display: none;">
+
+        <br><br>
+
+        <label for="geography">Location:</label>
+        <input type="text" id="geography" name="geography">
+
+        <br><br>
+
+        <input type="submit" value="Search">
+    </form>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!-- search_results.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Results</title>
+</head>
+<body>
+    <h1>Search Results</h1>
+    <h2>Search Type: {{ search_type }}</h2>
+    <h2>Property Name: {{ property_name }}</h2>
+    <h2>Location: {{ location }}</h2>
+
+    {% if scraped_data %}
+        <ul>
+            {% for result in scraped_data %}
+                <li>
+                    <h3>{{ result.title }}</h3>
+                    <p>Address: {{ result.address }}</p>
+                    <p>Price: {{ result.price }}</p>
+                    <p>Details: {{ result.details }}</p>
+                    <p>URL: <a href="{{ result.url }}">{{ result.url }}</a></p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No results found.</p>
+    {% endif %}
+</body>
+</html>
