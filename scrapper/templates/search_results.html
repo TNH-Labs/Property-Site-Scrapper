@@ -6,19 +6,39 @@
 </head>
 <body>
     <h1>Search Results</h1>
-    <h2>Search Type: {{ search_type }}</h2>
-    <h2>Property Name: {{ property_name }}</h2>
-    <h2>Location: {{ location }}</h2>
 
     {% if scraped_data %}
         <ul>
-            {% for result in scraped_data %}
+            {% for listing in scraped_data %}
+                {% for list in listing %}
+
+                    <li>
+                        <h3>{{list}}</h3>
+
+                    </li>
+                {% endfor %}
                 <li>
-                    <h3>{{ result.title }}</h3>
-                    <p>Address: {{ result.address }}</p>
-                    <p>Price: {{ result.price }}</p>
-                    <p>Details: {{ result.details }}</p>
-                    <p>URL: <a href="{{ result.url }}">{{ result.url }}</a></p>
+                    <h3>listings: {{listing}}</h3>
+                    <h2>{{ listing.property_name }}</h2>
+                    <p>Location: {{ listing.location }}</p>
+                    <p>Description: {{ listing.description }}</p>
+                    <p>Category: {{ listing.category }}</p>
+                    <p>URL: <a href="{{ listing.url }}">{{ listing.url }}</a></p>
+                    <img src="{{ listing.image }}" alt="Listing Image">
+                    {% if listing.price %}
+                        <p>Price: {{ listing.price }}</p>
+                    {% endif %}
+                    {% if listing.available_at %}
+                        <p>Available at: {{ listing.available_at }}</p>
+                    {% endif %}
+                    {% if listing.offered_by %}
+                        <p>Offered by: {{ listing.offered_by }}</p>
+                    {% endif %}
+                    {% for key, value in listing.items %}
+                        {% if key|slice:"0" == "@" %}
+                            <p>{{ key|slice:"1" }}: {{ value }}</p>
+                        {% endif %}
+                    {% endfor %}
                 </li>
             {% endfor %}
         </ul>
