@@ -13,25 +13,20 @@
                 {% for list in listing %}
 
                     <li>
-                        <h3>{{list}}</h3>
+                    <h2>{{ list.name }}</h2>
+                    <p>Location: {{ list.address }} - Locality: {{list.locality}}</p>
+                        <p>Region: {{list.region}}</p>
 
-                    </li>
-                {% endfor %}
-                <li>
-                    <h3>listings: {{listing}}</h3>
-                    <h2>{{ listing.property_name }}</h2>
-                    <p>Location: {{ listing.location }}</p>
-                    <p>Description: {{ listing.description }}</p>
-                    <p>Category: {{ listing.category }}</p>
-                    <p>URL: <a href="{{ listing.url }}">{{ listing.url }}</a></p>
-                    <img src="{{ listing.image }}" alt="Listing Image">
-                    {% if listing.price %}
+                    <p>Description: {{ list.description }}</p>
+                    <p>URL: <a href="{{ list.url }}">{{ list.url }}</a></p>
+                    <img src="{{ list.image }}" alt="Listing Image">
+                    {% if list.price %}
                         <p>Price: {{ listing.price }}</p>
                     {% endif %}
-                    {% if listing.available_at %}
+                    {% if list.available_at %}
                         <p>Available at: {{ listing.available_at }}</p>
                     {% endif %}
-                    {% if listing.offered_by %}
+                    {% if list.offered_by %}
                         <p>Offered by: {{ listing.offered_by }}</p>
                     {% endif %}
                     {% for key, value in listing.items %}
@@ -39,7 +34,10 @@
                             <p>{{ key|slice:"1" }}: {{ value }}</p>
                         {% endif %}
                     {% endfor %}
-                </li>
+
+
+                    </li>
+                {% endfor %}
             {% endfor %}
         </ul>
     {% else %}

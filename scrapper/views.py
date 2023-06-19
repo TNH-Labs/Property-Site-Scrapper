@@ -65,13 +65,27 @@ def scrape_loopnet(search_type, category, location):
                 'land': 'Land',
                 'residential-income-properties': 'Residential Income',
             },
-            'BBSType': {}  # No options for Auctions
+            'BBSType': {
+                'restaurants-and-food-businesses-for-sale': 'Restaurants & Food',
+                'retail-businesses-for-sale': 'Retail',
+                'service-businesses-for-sale': 'Service Businesses',
+                'wholesale-and-distribution-businesses-for-sale': 'Wholesale & Distributors',
+                'transportation-and-storage-businesses-for-sale': 'Transportation & Storage',
+                'online-and-technology-businesses-for-sale': 'Online & Technology',
+                'automotive-and-boat-businesses-for-sale': 'Automotive & Boat',
+                'franchises-for-sale': 'Franchise Opportunities',
+                'california-businesses-for-sale': 'All Industries'
+            }
         }
 
         # Get the corresponding category name from the mappings
         category_name = category_mappings[search_type].get(category)
+        print(f"Category name: {category_name}\n\n")
         if not category_name:
-            return []  # Invalid category
+            if search_type == 'auctions':
+                category_name = 'Auctions'
+            else:
+                return []  # Invalid category
 
         # Construct the URL
         url = ""
@@ -81,6 +95,8 @@ def scrape_loopnet(search_type, category, location):
             url = f"https://www.loopnet.com/search/{category}/{location}/for-sale/"
         elif search_type == 'BBSType':
             url = f"https://www.loopnet.com/biz/{location}/{category}/"
+        else:
+            url = f"https://www.loopnet.com/search/commercial-real-estate/usa/auctions/"
 
         print(f"Scraping {url}...")
 
@@ -137,38 +153,47 @@ def scrape_loopnet(search_type, category, location):
 
         # print(f"Results:",response.text.strip().split('\n'))
 
-        json_data = json.loads("".join(response.text))
 
+        json_data = json.loads("".join(response.text))
         modified_data = remove_at_symbols(json_data)
 
-        # Extract the property listings
         listings = []
         item = modified_data[1]
-        # print(f"data: {data}")
-        if item:
-            # print(f"item: {item}")
-            for key, value in item.items():
-                # print(f"key: {key}, value: {value}")
-                if key == 'about':
-                    for i in value:
-                        # print(f"i: {i}")
-                        if i['item']:
-                            # print(f"i['item']: {i['item']}")
-                            for key, value in i['item'].items():
-                                print(f"key: {key}, value: {value}")
-                                listing = {
-                                    'name': i['item']['name'],
-                                    'description': i['item']['description'],
-                                    'url': i['item']['url'],
-                                    'image': i['item']['image'],
-                                    'address': i['item']['availableAtOrFrom']['address']['streetAddress'],
-                                    'locality': i['item']['availableAtOrFrom']['address']['addressLocality'],
-                                    'region': i['item']['availableAtOrFrom']['address']['addressRegion']
-                                }
-                                listings.append(listing)
-                                print("\n\n\n yes \n\n\n")
 
-            # if isinstance(item, dict) and item.get('type') == 'Offer':
+        bbs = modified_data[2]
+        for i in bbs:
+            print(f"i: {i}\n\n")
+            print(f"\n\ni val: {bbs}\n\n")
+            for key, value in i.items():
+                if key['listingAttachments']:
+                    print(f"i val: {value}\n\n")
+        if item:
+            for key, value in item.items():
+                if key == 'about':
+                    # print(f"Value: {value}\n\n")
+                    for i in value:
+                        print(f"i: {i}\n\n")
+                        for key, value in i['item'].items():
+                            if 'availableAtOrFrom' in i['item']:
+                                if 'address' in i['item']['availableAtOrFrom']:
+                                    if 'streetAddress' in i['item']['availableAtOrFrom']['address']:
+                                        address = i['item']['availableAtOrFrom']['address']['streetAddress']
+                                        locality = i['item']['availableAtOrFrom']['address']['addressLocality']
+                                        region = i['item']['availableAtOrFrom']['address']['addressRegion']
+                                        print(f"i val: {address}\n\n")
+                                        listing = {
+                                            'name': i['item']['name'],
+                                            'description': i['item']['description'],
+                                            'url': i['item']['url'],
+                                            'image': i['item']['image'],
+                                            'address': address,
+                                            'locality': locality,
+                                            'region': region
+                                        }
+                                        if listing not in listings:
+                                            listings.append(listing)
+
+    # if isinstance(item, dict) and item.get('type') == 'Offer':
             #     listing = {
             #         'name': item['name'],
             #         'description': item['description'],
@@ -206,7 +231,7 @@ def scrape_loopnet(search_type, category, location):
         #
         # print(f"Cleaned data: {cleaned_data}...")
 
-        return modified_data
+        return listings
 
     # except Exception as e:
     #     print(f"An error occurred during scraping: {str(e)}")
