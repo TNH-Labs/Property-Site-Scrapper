@@ -30,6 +30,25 @@ def remove_at_symbols(obj):
 def index(request):
     return render(request, 'index.html')
 
+def find_value(data, target):
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if value == target:
+                return value
+            elif isinstance(value, (dict, list)):
+                result = find_value(value, target)
+                if result:
+                    return result
+    elif isinstance(data, list):
+        for item in data:
+            result = find_value(item, target)
+            if result:
+                return result
+
+    return None
+
+
+
 
 import requests
 from bs4 import BeautifulSoup
@@ -88,7 +107,6 @@ def scrape_loopnet(search_type, category, location):
                 return []  # Invalid category
 
         # Construct the URL
-        url = ""
         if search_type == 'forLease':
             url = f"https://www.loopnet.com/search/{category}/{location}/for-lease/"
         elif search_type == 'forSale':
@@ -100,14 +118,6 @@ def scrape_loopnet(search_type, category, location):
 
         print(f"Scraping {url}...")
 
-        # Define the proxy URL
-        proxy_url = 'https://proxy-server.scraperapi.com:8001'
-
-        # Set the request parameters
-        params = {
-            'api_key': '6e5709e72aca3705fd3914be2e16c635',
-            'autoparse': 'true'
-        }
 
         print("Before response...")
         # Make the request with the selected proxy and parameters
@@ -124,34 +134,33 @@ def scrape_loopnet(search_type, category, location):
         soup = BeautifulSoup(response.content, 'html.parser')
 
 
-        # print(f"soup {soup}...\n\n")
+        print("------------------------------------Below is the code where I want desired response--------------------------------------------------")
 
-        print("Scraping mid3!")
 
-        # Extract the desired information from the scraped HTML
-        results = []
-        listings = soup.find_all('li', class_='placard')
-        print(listings)
-        print("Scraping mid3!")
-        for listing in listings:
-            print("Scraping mid4!")
-            title = listing.find('h2', class_='listing-title').text.strip()
-            address = listing.find('div', class_='placard-header').text.strip()
-            url = listing.find('a', class_='placard-titleLink').get('href')
-            price = listing.find('span', class_='price').text.strip()
-            details = listing.find('ul', class_='details').text.strip()
-            result = {
-                'title': title,
-                'address': address,
-                'url': url,
-                'price': price,
-                'details': details
+        listings = []
+
+        listing_elements = soup.select("app-listings-container app-listing-diamond")
+        print(f"Found {len(listing_elements)} listings...")
+        for element in listing_elements:
+            name = element.select_one("h6").text.strip()
+            description = element.select_one("p.description").text.strip()
+            address = element.select_one(".location").text.strip()
+            price = element.select_one(".price").text.strip()
+
+            listing = {
+                "name": name,
+                "description": description,
+                "address": address,
+                "price": price
             }
-            results.append(result)
+            listings.append(listing)
 
-        print(f"Scraped {len(results)} results from LoopNet.")
+        # Print the scraped listings
+        for listing in listings:
+            print(listing)
+        print("--------------------------------------------------------------------------------------")
 
-        # print(f"Results:",response.text.strip().split('\n'))
+
 
 
         json_data = json.loads("".join(response.text))
@@ -160,82 +169,69 @@ def scrape_loopnet(search_type, category, location):
         listings = []
         item = modified_data[1]
 
-        bbs = modified_data[2]
-        for i in bbs:
-            print(f"i: {i}\n\n")
-            print(f"\n\ni val: {bbs}\n\n")
-            for key, value in i.items():
-                if key['listingAttachments']:
-                    print(f"i val: {value}\n\n")
-        if item:
-            for key, value in item.items():
-                if key == 'about':
-                    # print(f"Value: {value}\n\n")
-                    for i in value:
-                        print(f"i: {i}\n\n")
-                        for key, value in i['item'].items():
-                            if 'availableAtOrFrom' in i['item']:
-                                if 'address' in i['item']['availableAtOrFrom']:
-                                    if 'streetAddress' in i['item']['availableAtOrFrom']['address']:
-                                        address = i['item']['availableAtOrFrom']['address']['streetAddress']
-                                        locality = i['item']['availableAtOrFrom']['address']['addressLocality']
-                                        region = i['item']['availableAtOrFrom']['address']['addressRegion']
-                                        print(f"i val: {address}\n\n")
-                                        listing = {
-                                            'name': i['item']['name'],
-                                            'description': i['item']['description'],
-                                            'url': i['item']['url'],
-                                            'image': i['item']['image'],
-                                            'address': address,
-                                            'locality': locality,
-                                            'region': region
-                                        }
-                                        if listing not in listings:
-                                            listings.append(listing)
 
-    # if isinstance(item, dict) and item.get('type') == 'Offer':
-            #     listing = {
-            #         'name': item['name'],
-            #         'description': item['description'],
-            #         'url': item['url'],
-            #         'image': item['image'],
-            #         'address': item['availableAtOrFrom']['address']['streetAddress'],
-            #         'locality': item['availableAtOrFrom']['address']['addressLocality'],
-            #         'region': item['availableAtOrFrom']['address']['addressRegion']
-            #     }
-            #     listings.append(listing)
+        if search_type == 'BBSType':
+            BBS(modified_data[3])
 
-        # Print the property listings
-        print(f"\n\nListings:", listings)
-        # for listing in listings:
-        #     print(listing)
+        if search_type == 'forLease' or search_type == 'forSale':
+            if item:
+                for key, value in item.items():
+                    if key == 'about':
+                        # print(f"Value: {value}\n\n")
+                        for i in value:
+                            print(f"i: {i}\n\n")
+                            for key, value in i['item'].items():
+                                if 'availableAtOrFrom' in i['item']:
+                                    if 'address' in i['item']['availableAtOrFrom']:
+                                        if 'streetAddress' in i['item']['availableAtOrFrom']['address']:
+                                            address = i['item']['availableAtOrFrom']['address']['streetAddress']
+                                            locality = i['item']['availableAtOrFrom']['address']['addressLocality']
+                                            region = i['item']['availableAtOrFrom']['address']['addressRegion']
+                                            print(f"i val: {address}\n\n")
+                                            listing = {
+                                                'name': i['item']['name'],
+                                                'description': i['item']['description'],
+                                                'url': i['item']['url'],
+                                                'image': i['item']['image'],
+                                                'address': address,
+                                                'locality': locality,
+                                                'region': region
+                                            }
+                                            if listing not in listings:
+                                                listings.append(listing)
 
-        # # Remove the "@" symbol from keys in each dictionary
-        # modified_data = []
-        # for item in json_data:
-        #     modified_item = {}
-        #     for key, value in item.items():
-        #         modified_key = key.replace("@", "")
-        #         modified_item[modified_key] = value
-        #     modified_data.append(modified_item)
-        #
-        # print(f"\n\nModified data: {modified_dat}...")
-        #
-        # cleaned_data = {}
-        # for i in response.text.strip().split('\n'):
-        #     print(f"i: {i}...")
-        #     for key, value in i:
-        #         cleaned_key = re.sub('^@', '', key)
-        #         cleaned_data[cleaned_key] = value
-        #
-        #
-        # print(f"Cleaned data: {cleaned_data}...")
+            print(f"\n\nListings:", listings)
 
         return listings
 
-    # except Exception as e:
-    #     print(f"An error occurred during scraping: {str(e)}")
-    #     return []
+def BBS(response):
+    bbs = response
+    print(f"bbs: {bbs}\n\n")
+    print("-------------------------------------------end bbs-------------------------------------------")
+    for key, value in bbs.items():
+            for kii, vii in value.items():
+                # print(f"key: {kii}\n\n")
+                if kii == 'value':
+                    for k, y in vii.items():
+                        # print(f"key: {k}\n\n")
+                        # print(f"value: {y}\n\n")
+                        if k == 'listingAttachments' or k == 'syndicators' or k == 'bfsSearchResult':
+                            # print(f"\n\nkey {k}, \nvalue::{y}\n\n")
+                            for ke, va in y.items():
+                                # print(f"\n\nkey {ke}, \nvalue::{va}\n\n")
+                                if ke == 'relatedAuctions':
+                                    # print(f"\n\nkey {ke}, \nvalue::{va}\n\n")
+                                    for i in va:
+                                        for ky, vy in i.items():
+                                            if ky == 'listingAttachments':
+                                                # print(f"\n\nkey {ky}, \nvalue::{vy}\n\n")
+                                                print("---------------first-----------------")
+                                                for z in vy:
+                                                    for k, v in z.items():
+                                                        business = {}
+                                                        print(f"\n\nkey {k}, \nvalue::{v}\n\n")
+
+
 
 
 def search_results(request):
