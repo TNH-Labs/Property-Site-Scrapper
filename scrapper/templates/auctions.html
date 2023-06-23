@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Listings</title>
+</head>
+<body>
+    <h1>Listings</h1>
+    {% for item in listings %}
+    <div>
+        <h2>{{ item.name }}</h2>
+        <p>Type: {{ item.type }}</p>
+        <p>Description: {{ item.description }}</p>
+        <p>URL: <a href="{{ item.url }}">{{ item.url }}</a></p>
+        <p>Image: <img src="{{ item.image }}"></p>
+        <p>Category: {{ item.category }}</p>
+        <p>Address: {{ item.address }}</p>
+        <p>Locality: {{ item.locality }}</p>
+        <p>Region: {{ item.region }}</p>
+        <p>Offered By: {{ item.offered_by }}</p>
+        <p>Job Title: {{ item.offered_by_job_title }}</p>
+        <p>Works For: {{ item.works_for }}</p>
+    </div>
+    {% endfor %}
+</body>
+</html>

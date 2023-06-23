@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Listings</title>
+</head>
+<body>
+    <h1>Listings</h1>
+    {% for item in listings %}
+    <div>
+        <h2>{{ item.header }}</h2>
+        <p>URL: <a href="{{ item.url }}">{{ item.url }}</a></p>
+        <p>List Number: {{ item.listNumber }}</p>
+        <p>Description: {{ item.description }}</p>
+        <p>Price: ${{ item.price }}</p>
+        <p>Image: <img src="{{ item.image }}"></p>
+        <p>Location: {{ item.location }}</p>
+        <p>Cash Flow: ${{ item.cashFlow }}</p>
+        <p>Contact Name: {{ item.Contact_name }}</p>
+        <p>Contact Phone: {{ item.Contact_phone }}</p>
+    </div>
+    {% endfor %}
+</body>
+</html>
