@@ -8,4 +8,6 @@ app_name = 'scrapper'
 urlpatterns = [
     path('', views.index, name='index'),
     path('search/', views.search_results, name='search_results'),
+    path('search_results/download-csv/', views.csv_loopnet, name='download_csv'),
+
 ]

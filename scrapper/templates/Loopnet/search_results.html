@@ -8,6 +8,7 @@
     <h1>Search Results</h1>
 
     {% if scraped_data %}
+    <a href="{% url 'scrapper:download_csv' %}" class="btn btn-primary">Download CSV</a>
         <ul>
             {% for listing in scraped_data %}
                 {% for list in listing %}

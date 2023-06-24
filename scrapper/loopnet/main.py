@@ -7,6 +7,7 @@ import random
 import re
 from zenrows import ZenRowsClient
 
+from ..CSV import save_dict_to_csv
 
 
 def scrape_loopnet(search_type, category, location):
@@ -93,6 +94,7 @@ def scrape_loopnet(search_type, category, location):
         print(f"modified_data: {modified_data}\n\n")
 
         listings = []
+        csv_listings = []
         item = modified_data[1]
 
         if search_type == 'auctions':
@@ -158,13 +160,13 @@ def scrape_loopnet(search_type, category, location):
         elif search_type == 'BBSType':
             listings = BBS(modified_data[3])
 
-        print(f"\n\nListings:", listings)
 
         return listings
 
 def BBS(response):
     url = "https://www.loopnet.com"
     listings = []
+    csv_listings = []
     bbs = response
     print(f"url: {url}\n\n")
     # print(f"bbs: {bbs}\n\n")
@@ -192,6 +194,7 @@ def BBS(response):
                     }
                     if listing not in listings:
                         listings.append(listing)
+                        csv_listings.append(csv)
 
 
 
