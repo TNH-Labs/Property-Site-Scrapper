@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scrap Showcase Website</title>
+        <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const searchTypeSelect = document.getElementById('search-type');
+            const propertyTypeForLeaseInput = document.getElementById('propertytypeforrent');
+            const propertyTypeForSaleInput = document.getElementById('propertytypeforsale');
+            const propertyTypeForLeaseOptions = ["Office", "Coworking", "Industrial", "Retail", "Restaurant", "Flex", "Medical", "Land"];
+            const propertyTypeForSaleOptions = ["Office", "Industrial", "Retail", "Restaurant", "Shopping Center", "Multifamily", "Specialty", "Health Care", "Hospitality", "Sports & Entertainment", "Land", "Residential Income"];
+
+            function handleSearchTypeChange() {
+                const selectedValue = searchTypeSelect.value;
+
+                propertyTypeForLeaseInput.style.display = selectedValue === 'For Rent' ? 'block' : 'none';
+                propertyTypeForSaleInput.style.display = selectedValue === 'For Sale' ? 'block' : 'none';
+            }
+
+            function validateInput(event) {
+                const selectedValue = searchTypeSelect.value;
+
+                if (selectedValue === 'For Rent') {
+                    const userInput = propertyTypeForLeaseInput.value;
+                    const matchingOption = propertyTypeForLeaseOptions.find(option => option.toLowerCase() === userInput.toLowerCase());
+                    if (matchingOption) {
+                        propertyTypeForLeaseInput.value = matchingOption;
+                    }
+                } else if (selectedValue === 'For Sale') {
+                    const userInput = propertyTypeForSaleInput.value;
+                    const matchingOption = propertyTypeForSaleOptions.find(option => option.toLowerCase() === userInput.toLowerCase());
+                    if (matchingOption) {
+                        propertyTypeForSaleInput.value = matchingOption;
+                    }
+                }
+
+                return true; // Submit the form
+            }
+
+            searchTypeSelect.addEventListener('change', handleSearchTypeChange);
+            handleSearchTypeChange();
+
+            document.getElementById('search-form').addEventListener('submit', validateInput);
+
+            // Clear the input fields on focus
+            propertyTypeForLeaseInput.addEventListener('focus', clearInput);
+            propertyTypeForSaleInput.addEventListener('focus', clearInput);
+            propertyTypeBBSInput.addEventListener('focus', clearInput);
+
+            function clearInput(event) {
+                event.target.value = '';
+            }
+
+            // Update the input fields on input
+            propertyTypeForLeaseInput.addEventListener('input', updateInput);
+            propertyTypeForSaleInput.addEventListener('input', updateInput);
+            propertyTypeBBSInput.addEventListener('input', updateInput);
+
+            function updateInput(event) {
+                const selectedValue = searchTypeSelect.value;
+                const userInput = event.target.value;
+
+                if (selectedValue === 'For Rent') {
+                    const matchingOption = propertyTypeForLeaseOptions.find(option => option.toLowerCase() === userInput.toLowerCase());
+                    if (matchingOption) {
+                        event.target.value = matchingOption;
+                    }
+                } else if (selectedValue === 'For Sale') {
+                    const matchingOption = propertyTypeForSaleOptions.find(option => option.toLowerCase() === userInput.toLowerCase());
+                    if (matchingOption) {
+                        event.target.value = matchingOption;
+                    }
+                }
+            }
+        });
+    </script>
+
+</head>
+<body>
+  <h1>Search</h1>
+
+        <form id="search-form" method="POST" action="{% url 'scrapper:search_Showcase' %}">
+        {% csrf_token %}
+
+        <label for="search-type">Search Type:</label>
+        <select id="search-type" name="search-type">
+            <option value="For Rent">Rent</option>
+            <option value="For Sale">Sale</option>
+        </select>
+
+        <label for="propertytypeforrent" id="propertytypeforrent-label" style="display: none;">Property Name:</label>
+        <input type="text" id="propertytypeforrent" name="propertytypeforrent" style="display: none;">
+
+        <label for="propertytypeforsale" id="propertytypeforsale-label" style="display: none;">Property Name:</label>
+        <input type="text" id="propertytypeforsale" name="propertytypeforsale" style="display: none;">
+
+        <br><br>
+
+        <label for="geography">Location:</label>
+        <input type="text" id="geography" name="geography">
+
+        <br><br>
+
+        <input type="submit" value="Search">
+    </form>
+
+</body>
+</html>

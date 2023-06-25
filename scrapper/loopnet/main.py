@@ -194,8 +194,6 @@ def BBS(response):
                     }
                     if listing not in listings:
                         listings.append(listing)
-                        csv_listings.append(csv)
-
 
 
     # print(f"\n\nListings:", listings)

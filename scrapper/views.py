@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 from .CSV import save_dict_to_csv
+from .ShowCase.main import scrape_showcase
 from .loopnet.main import *
 
 global scraped_data
@@ -16,7 +17,7 @@ def index(request):
 
 
 def csv_loopnet(request):
-    data = request.session['loopnet_data']
+    data = request.session['scrapdata']
     updated_data = []
     for i in data:
         updated_dict = {}
@@ -34,7 +35,7 @@ def csv_loopnet(request):
     return response
 
 
-def search_results(request):
+def loopnet(request):
     if request.method == 'POST':
         # Access and process the form data here
         search_type = request.POST.get('search-type')
@@ -52,7 +53,7 @@ def search_results(request):
         # Perform scraping using the form data
         scraped_data = scrape_loopnet(search_type, property_name, location)
 
-        request.session['loopnet_data'] = scraped_data
+        request.session['scrapdata'] = scraped_data
 
         # print(f"Scraped data: {scraped_data}...")
 
@@ -75,3 +76,28 @@ def search_results(request):
 
     # Render the search form template for GET requests
     return render(request, 'Loopnet/search.html')
+
+
+def showcase(request):
+    if request.method == 'POST':
+        search_type = request.POST.get('search-type')
+        property_name = None
+        if search_type == 'forLease':
+            property_name = request.POST.get('propertytypeforrent')
+        elif search_type == 'forSale':
+            property_name = request.POST.get('propertytypeforsale')
+
+        location = request.POST.get('geography')
+
+        scraped_data = scrape_showcase(search_type, property_name, location)
+        request.session['scrapdata'] = scraped_data
+        return render(request, 'ShowCase/search_results.html', {
+            'search_type': search_type,
+            'property_name': property_name,
+            'location': location,
+            'scraped_data': [scraped_data],
+        })
+
+
+
+    return render(request, 'ShowCase/search.html')
