@@ -10,6 +10,8 @@ from zenrows import ZenRowsClient
 from ..CSV import save_dict_to_csv
 
 
+
+
 def scrape_loopnet(search_type, category, location):
     # try:
         # Perform scraping based on the selected search type and form data
@@ -19,56 +21,61 @@ def scrape_loopnet(search_type, category, location):
         print(f"Location: {location}\n\n")
         category_mappings = {
             'forLease': {
-                'coworking-space': 'Coworking',
-                'industrial-space': 'Industrial',
-                'retail-space': 'Retail',
-                'restaurants': 'Restaurant',
-                'flex-space': 'Flex',
-                'medical-offices': 'Medical',
-                'land': 'Land',
+                'Coworking': 'coworking-space',
+                'Industrial': 'industrial-space',
+                'Retail': 'retail-space',
+                'Restaurant': 'restaurants',
+                'Flex': 'flex-space',
+                'Medical': 'medical-offices',
+                'Land': 'land'
             },
             'forSale': {
-                'office-buildings': 'Office',
-                'industrial-properties': 'Industrial',
-                'retail-properties': 'Retail',
-                'restaurants': 'Restaurant',
-                'shopping-centers': 'Shopping Center',
-                'apartment-buildings': 'Multifamily',
-                'commercial-real-estate': 'Specialty',
-                'health-care-facilities': 'Health Care',
-                'hospitality-properties': 'Hospitality',
-                'sports-entertainment-properties': 'Sports & Entertainment',
-                'land': 'Land',
-                'residential-income-properties': 'Residential Income',
+                'Office': 'office-buildings',
+                'Industrial': 'industrial-properties',
+                'Retail': 'retail-properties',
+                'Restaurant': 'restaurants',
+                'Shopping Center': 'shopping-centers',
+                'Multifamily': 'apartment-buildings',
+                'Specialty': 'commercial-real-estate',
+                'Health Care': 'health-care-facilities',
+                'Hospitality': 'hospitality-properties',
+                'Sports & Entertainment': 'sports-entertainment-properties',
+                'Land': 'land',
+                'Residential Income': 'residential-income-properties'
             },
             'BBSType': {
-                'restaurants-and-food-businesses-for-sale': 'Restaurants & Food',
-                'retail-businesses-for-sale': 'Retail',
-                'service-businesses-for-sale': 'Service Businesses',
-                'wholesale-and-distribution-businesses-for-sale': 'Wholesale & Distributors',
-                'transportation-and-storage-businesses-for-sale': 'Transportation & Storage',
-                'online-and-technology-businesses-for-sale': 'Online & Technology',
-                'automotive-and-boat-businesses-for-sale': 'Automotive & Boat',
-                'franchises-for-sale': 'Franchise Opportunities',
-                'california-businesses-for-sale': 'All Industries'
+                'Restaurants & Food': 'restaurants-and-food-businesses-for-sale',
+                'Retail': 'retail-businesses-for-sale',
+                'Service Businesses': 'service-businesses-for-sale',
+                'Wholesale & Distributors': 'wholesale-and-distribution-businesses-for-sale',
+                'Transportation & Storage': 'transportation-and-storage-businesses-for-sale',
+                'Online & Technology': 'online-and-technology-businesses-for-sale',
+                'Automotive & Boat': 'automotive-and-boat-businesses-for-sale',
+                'Franchise Opportunities': 'franchises-for-sale',
+                'All Industries': 'california-businesses-for-sale'
             },
             'auctions': {}
         }
 
-        # Get the corresponding category name from the mappings
-        try:
-            category_name = category_mappings[search_type].get(category)
-        except:
-            category_name = 'auctions'
-        print(f"Category name: {category_name}\n\n")
+        print(f"search_type: {search_type}")
+        print(f"cateogry: {category}")
+
+        def get_value_by_type_and_key(search_type, key):
+            if search_type in category_mappings and key in category_mappings[search_type]:
+                return category_mappings[search_type][key]
+            else:
+                return None
+
+        category_name = get_value_by_type_and_key(search_type, category)
+
 
         # Construct the URL
         if search_type == 'forLease':
-            url = f"https://www.loopnet.com/search/{category}/{location}/for-lease/"
+            url = f"https://www.loopnet.com/search/{category_name}/{location}/for-lease/"
         elif search_type == 'forSale':
-            url = f"https://www.loopnet.com/search/{category}/{location}/for-sale/"
+            url = f"https://www.loopnet.com/search/{category_name}/{location}/for-sale/"
         elif search_type == 'BBSType':
-            url = f"https://www.loopnet.com/biz/{location}/{category}/"
+            url = f"https://www.loopnet.com/biz/{location}/{category_name}/"
         else:
             url = f"https://www.loopnet.com/search/commercial-real-estate/{location.lower()}/auctions/"
 

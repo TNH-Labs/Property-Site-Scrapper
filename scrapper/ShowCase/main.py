@@ -16,42 +16,49 @@ def scrape_showcase(search_type, category, location):
 
         category_mappings = {
             "For Rent": {
-                "commercial-real-estate": "All Spaces",
-                "office-space": "Office Space",
-                "warehouses": "Industrial and Warehouse Space",
-                "retail-space": "Retail Space",
-                "restaurants": "Restaurants",
-                "flex-space": "Flex Space",
-                "medical-offices": "Medical Offices",
-                "coworking-space": "Coworking Space",
-                "land": "Land"
+                "All Spaces": "commercial-real-estate",
+                "Office Space": "office-space",
+                "Industrial and Warehouse Space": "warehouses",
+                "Retail Space": "retail-space",
+                "Restaurants": "restaurants",
+                "Flex Space": "flex-space",
+                "Medical Offices": "medical-offices",
+                "Coworking Space": "coworking-space",
+                "Land": "land"
             },
             "For Sale": {
-                "commercial-real-estate": "All Property Types",
-                "office-space": "Office Space",
-                "industrial-space": "Industrial Space",
-                "retail-space": "Retail Space",
-                "restaurants": "Restaurants",
-                "apartment-buildings": "Multifamily Apartments",
-                "hotels": "Hotels & Motels",
-                "health-care-facilities": "Health Care Properties",
-                "investment-properties": "Investment Properties",
-                "land": "Land",
-                "shopping-centers-malls": "Shopping Centers & Malls",
-                "sports-entertainment-properties": "Sports & Entertainment Properties",
-                "residential-income-properties": "Residential Income Properties"
+                "All Property Types": "commercial-real-estate",
+                "Office Space": "office-space",
+                "Industrial Space": "industrial-space",
+                "Retail Space": "retail-space",
+                "Restaurants": "restaurants",
+                "Multifamily Apartments": "apartment-buildings",
+                "Hotels & Motels": "hotels",
+                "Health Care Properties": "health-care-facilities",
+                "Investment Properties": "investment-properties",
+                "Land": "land",
+                "Shopping Centers & Malls": "shopping-centers-malls",
+                "Sports & Entertainment Properties": "sports-entertainment-properties",
+                "Residential Income Properties": "residential-income-properties"
             }
         }
 
 
-        category_name = category_mappings[search_type].get("land")
+        def get_value_by_type_and_key(search_type, key):
+            if search_type in category_mappings and key in category_mappings[search_type]:
+                return category_mappings[search_type][key]
+            else:
+                return None
+
+
+        category_name = get_value_by_type_and_key(search_type, category)
         print(f"Category name: {category_name}")
 
         # Construct the URL
         if search_type == 'For Sale':
-            url = f"https://www.showcase.com/{location}/{category}/for-sale/"
+            url = f"https://www.showcase.com/{location}/{category_name}/for-sale/"
         else:
-            url = f"https://www.showcase.com/{location}/{category}/for-rent/"
+            url = f"https://www.showcase.com/{location}/{category_name}/for-rent/"
 
         print(f"Scraping {url}...")
 
@@ -76,19 +83,48 @@ def scrape_showcase(search_type, category, location):
 
         sale_data = [modified_data[0]]
 
-        if search_type == 'For Sale':
+        print(search_type, "search type...")
+        url = "https://www.showcase.com"
+        listings = []
+
+        if search_type == 'For Rent':
             for key, values in sale_data[0].items():
-                print(f"Key: {key}...")
-                print(f"Values: {values}...")
                 if key == 'about':
-                    print("yes")
-                # if key == "breadcrumb":
-                #     for value in values:
-                #         for kii, vii in value.items():
-                #             if kii == ['itemListElement']:
-                #                 for i in vii:
-                #                     for k,v in i:
+                    for i in values:
+                        # print(f"i: {i}...")
+                        listing = {
+                            "name": i["item"]["name"],
+                            "description": i["item"]["description"],
+                            "url": url + i["item"]["url"],
+                            "image": i["item"]["image"],
+                            "price": i["item"]["price"] + " " + i["item"]["priceCurrency"],
+                            "address": i["item"]["availableAtOrFrom"]["address"]["streetAddress"],
+                            "locality": i["item"]["availableAtOrFrom"]["address"]["addressLocality"],
+                            "region": i["item"]["availableAtOrFrom"]["address"]["addressRegion"],
+                        }
+                        if listing not in listings:
+                            listings.append(listing)
+        else:
+            for key, values in sale_data[0].items():
+                print(f"key: {key}...")
+                print(f"values: {values}...")
+                if key == 'about':
+                    for i in values:
+                        # print(f"i: {i}...")
+                        listing = {
+                            "name": i["item"]["name"],
+                            "description": i["item"]["description"],
+                            "url": url + i["item"]["url"],
+                            "image": i["item"]["image"],
+                            "price": i["item"]["price"] + " " + i["item"]["priceCurrency"],
+                            "address": i["item"]["availableAtOrFrom"]["address"]["streetAddress"],
+                            "locality": i["item"]["availableAtOrFrom"]["address"]["addressLocality"],
+                            "region": i["item"]["availableAtOrFrom"]["address"]["addressRegion"],
+                        }
+                        if listing not in listings:
+                            listings.append(listing)
 
 
 
-        return modified_data
+
+        return listings
