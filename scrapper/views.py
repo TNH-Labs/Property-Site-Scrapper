@@ -101,3 +101,26 @@ def showcase(request):
 
 
     return render(request, 'ShowCase/search.html')
+
+def crexi(request):
+    if request.method == 'POST':
+        search_type = request.POST.get('search-type')
+        property_name = None
+        if search_type == 'forLease':
+            property_name = request.POST.get('propertytypeforrent')
+        elif search_type == 'forSale':
+            property_name = request.POST.get('propertytypeforsale')
+
+        location = request.POST.get('geography')
+
+        scraped_data = scrape_crexi(search_type, property_name, location)
+        request.session['scrapdata'] = scraped_data
+        return render(request, 'Crexi/search_results.html', {
+            'search_type': search_type,
+            'property_name': property_name,
+            'location': location,
+            'scraped_data': [scraped_data],
+        })
+
+    return render(request, 'Crexi/search.html')
+
