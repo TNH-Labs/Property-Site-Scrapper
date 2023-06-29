@@ -28,15 +28,35 @@ type_options = WebDriverWait(driver, 10).until(
     EC.visibility_of_element_located((By.XPATH, "/html/body/crx-app/div/crx-home-page/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/crx-home-hero/div/div[2]/crx-search-tabs/crx-mobile-search/div/div[4]/div[2]/crx-sales-search-form/div/crx-sales-property-type-dropdown/crx-dropdown-form/crx-dropdown-button/div/crx-dropdown-portal/div/div/div[2]/crx-sales-property-type-filter/crx-multilevel-checkboxes"))
 )
 
-# Click the checkbox corresponding to the "Retail" choice
-wait = WebDriverWait(driver, 10)
-checkbox_xpath = "/html/body/crx-app/div/crx-home-page/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/crx-home-hero/div/div[2]/crx-search-tabs/crx-mobile-search/div/div[4]/div[2]/crx-sales-search-form/div/crx-sales-property-type-dropdown/crx-dropdown-form/crx-dropdown-button/div/crx-dropdown-portal/div/div/div[2]/crx-sales-property-type-filter/crx-multilevel-checkboxes/div[2]/cui-checkbox/mat-checkbox/div/div/div[3]/svg/path"
-checkbox = wait.until(EC.visibility_of_element_located((By.XPATH, checkbox_xpath)))
-checkbox.click()
-
 # Get the text of the choice
-choice_xpath = "/html/body/crx-app/div/crx-home-page/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/crx-home-hero/div/div[2]/crx-search-tabs/crx-mobile-search/div/div[4]/div[2]/crx-sales-search-form/div/crx-sales-property-type-dropdown/crx-dropdown-form/crx-dropdown-button/div/crx-dropdown-portal/div/div/div[2]/crx-sales-property-type-filter/crx-multilevel-checkboxes/div[2]/cui-checkbox/mat-checkbox/div/label"
-choice = driver.find_element(By.XPATH, choice_xpath).text
-print(choice)
+choices_xpath = "/html/body/crx-app/div/crx-home-page/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/crx-home-hero/div/div[2]/crx-search-tabs/crx-mobile-search/div/div[4]/div[2]/crx-sales-search-form/div/crx-sales-property-type-dropdown/crx-dropdown-form/crx-dropdown-button/div/crx-dropdown-portal/div/div/div[2]/crx-sales-property-type-filter/crx-multilevel-checkboxes"
+choices_elements = driver.find_elements(By.XPATH, choices_xpath)
+# print(f"Number of choices: {len(choices_elements)}")
+# print(f"Choice text[0]: {choices_elements[0].text}")
+# print(f"Choice text: {choices_elements}")
+# Loop through the choices and click on the desired one
+desired_choice_text = "Retail"  # Replace with your desired choice text
 
+if desired_choice_text == "Retail":
+    choice_xpath = "/html/body/crx-app/div/crx-home-page/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/crx-home-hero/div/div[2]/crx-search-tabs/crx-mobile-search/div/div[4]/div[2]/crx-sales-search-form/div/crx-sales-property-type-dropdown/crx-dropdown-form/crx-dropdown-button/div/crx-dropdown-portal/div/div/div[2]/crx-sales-property-type-filter/crx-multilevel-checkboxes/div[2]"
+    choice = driver.find_element(By.XPATH, choice_xpath).text
+    print(f"Choice: {choice}")
+    check = "/html/body/crx-app/div/crx-home-page/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/crx-home-hero/div/div[2]/crx-search-tabs/crx-mobile-search/div/div[4]/div[2]/crx-sales-search-form/div/crx-sales-property-type-dropdown/crx-dropdown-form/crx-dropdown-button/div/crx-dropdown-portal/div/div/div[2]/crx-sales-property-type-filter/crx-multilevel-checkboxes/div[2]/cui-checkbox/mat-checkbox/div/div/input"
+    driver.find_element(By.XPATH, check).click()
+    time.sleep(5)
+    search_button = driver.find_element(By.XPATH, "/html/body/crx-app/div/crx-home-page/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/crx-home-hero/div/div[2]/crx-search-tabs/crx-mobile-search/div/div[4]/div[2]/crx-sales-search-form/div/div/crx-search-bar/form/button")
+    search_button.click()
+    time.sleep(15)
+
+    # Get the HTML response of the opened page
+    html_response = driver.page_source
+
+    # Print the HTML response
+    print(html_response)
+# for choice_element in choices_elements:
+#     print(f"Choice text: {choice_element.text}")
+#     if choice_element.text == desired_choice_text:
+#         print("Found desired choice")
+#         choice_element.click()
+#         break
 # Rest of your code...
