@@ -113,8 +113,7 @@ def crexi(request):
 
         location = request.POST.get('geography')
 
-        scraped_data = scrape_crexi(search_type, property_name, location)
-        request.session['scrapdata'] = scraped_data
+
         return render(request, 'Crexi/search_results.html', {
             'search_type': search_type,
             'property_name': property_name,

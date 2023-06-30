@@ -1,109 +1,218 @@
-import re
-import time
-
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
+from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
+import json
+import random
+import re
+from zenrows import ZenRowsClient
 
-# Set up Selenium WebDriver
-driver = webdriver.Chrome()
-driver.get("https://www.crexi.com/")
-
-# Wait for the search input field to be visible
-search_input = WebDriverWait(driver, 10).until(
-    EC.visibility_of_element_located((By.CSS_SELECTOR, "crx-search-bar input.search-bar-input"))
-)
-
-# Enter the location in the search input field
-location = "CA"
-search_input.send_keys(location)
-
-# Select the "Type" dropdown and choose a property type
-type_dropdown = driver.find_element(By.CSS_SELECTOR, "crx-sales-property-type-dropdown crx-dropdown-button")
-type_dropdown.click()
-
-# Wait for the property type options to be visible
-type_options = WebDriverWait(driver, 10).until(
-    EC.visibility_of_element_located((By.XPATH, "/html/body/crx-app/div/crx-home-page/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/crx-home-hero/div/div[2]/crx-search-tabs/crx-mobile-search/div/div[4]/div[2]/crx-sales-search-form/div/crx-sales-property-type-dropdown/crx-dropdown-form/crx-dropdown-button/div/crx-dropdown-portal/div/div/div[2]/crx-sales-property-type-filter/crx-multilevel-checkboxes"))
-)
-
-# print([type_options.text], "type_options.text")
-text = type_options.text
-list_items = [item for item in text.split("\n") if item.isalnum()]
-print(list_items, "list_items") # returns data like ['All', 'Retail', 'Multifamily', 'Office', 'Industrial', 'Hospitality', 'Land']
-
-
-wait = WebDriverWait(driver, 10)
-# dropdown_options = wait.until(EC.presence_of_all_elements_located((By.XPATH, "//crx-dropdown-portal//crx-option")))
-property_type = "Retail"
-
-checkbox_xpath = "/html/body/crx-app/div/crx-home-page/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/crx-home-hero/div/div[2]/crx-search-tabs/crx-mobile-search/div/div[4]/div[2]/crx-sales-search-form/div/crx-sales-property-type-dropdown/crx-dropdown-form/crx-dropdown-button/div/crx-dropdown-portal/div/div/div[2]/crx-sales-property-type-filter/crx-multilevel-checkboxes/div[2]/cui-checkbox/mat-checkbox/div/div/div[3]/svg/path"
-choice_xpath = "/html/body/crx-app/div/crx-home-page/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/crx-home-hero/div/div[2]/crx-search-tabs/crx-mobile-search/div/div[4]/div[2]/crx-sales-search-form/div/crx-sales-property-type-dropdown/crx-dropdown-form/crx-dropdown-button/div/crx-dropdown-portal/div/div/div[2]/crx-sales-property-type-filter/crx-multilevel-checkboxes/div[2]/cui-checkbox/mat-checkbox/div/label"
-checkbox = driver.find_element(By.XPATH, checkbox_xpath)
-checkbox.click()
-
-choice_name = driver.find_element(By.XPATH, choice_xpath).text
-print(choice_name)
-
-for i in list_items:
-    if i == property_type:
-        checkbox_xpath = f"//crx-sales-property-type-filter/crx-multilevel-checkboxes/div[text()='{i}']/../cui-checkbox/mat-checkbox/div"
-        checkbox = driver.find_element(By.XPATH, checkbox_xpath)
-        checkbox.click()
-
-# wait
-time.sleep(5)
-
-
-# Locate the container element that contains the dropdown options
-type_options_container = driver.find_element(By.XPATH, "//crx-sales-property-type-filter/crx-multilevel-checkboxes")
-
-print(type_options_container.text, "type_options_container")
-checkbox_xpath = "/html/body/crx-app/div/crx-home-page/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/crx-home-hero/div/div[2]/crx-search-tabs/crx-mobile-search/div/div[4]/div[2]/crx-sales-search-form/div/crx-sales-property-type-dropdown/crx-dropdown-form/crx-dropdown-button/div/crx-dropdown-portal/div/div/div[2]/crx-sales-property-type-filter/crx-multilevel-checkboxes/div[2]/cui-checkbox/mat-checkbox/div/div"
-
-checkbox = driver.find_element(By.XPATH, checkbox_xpath)
-
-print(checkbox, "checkbox")
-checkbox.click()
-
-choice_name_xpath = "/html/body/crx-app/div/crx-home-page/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/crx-home-hero/div/div[2]/crx-search-tabs/crx-mobile-search/div/div[4]/div[2]/crx-sales-search-form/div/crx-sales-property-type-dropdown/crx-dropdown-form/crx-dropdown-button/div/crx-dropdown-portal/div/div/div[2]/crx-sales-property-type-filter/crx-multilevel-checkboxes/div[2]/cui-checkbox/mat-checkbox/div/label"
-
-choice_name = driver.find_element(By.XPATH, choice_name_xpath).text
-print(choice_name)
+from ..CSV import save_dict_to_csv
 
 
 
-# Find the specific option by its name
-property_type_checkbox = type_options_container.find_element(By.XPATH, f".//div[text()='{property_type}']/../cui-checkbox/mat-checkbox/div")
-property_type_label = type_options_container.find_element(By.XPATH, f".//div[text()='{property_type}']/../cui-checkbox/mat-checkbox/div/label")
 
-# Scroll the option into view
-driver.execute_script("arguments[0].scrollIntoView(true);", property_type_checkbox)
+def scrape_crexi(search_type, category, location):
+    # try:
+        # Perform scraping based on the selected search type and form data
+        print("\n\nScraping LoopNet...")
+        print(f"Search type: {search_type}")
+        print(f"Property name: {category}")
+        print(f"Location: {location}\n\n")
+        category_mappings = {
+            'Lease':
+                {'Office': 'Office', 'Retail': 'Retail', 'Industrial': 'Industrial', 'Land': 'Land',
+     'Special Purpose': 'Special Purpose', 'Restaurant': 'Restaurant'},
+    'Sale':
+        {'Office': 'Office', 'Retail': 'Retail', 'Multifamily': 'Multifamily', 'Industrial': 'Industrial',
+     'Mixed Use': 'Mixed Use', 'Hospitality': 'Hospitality', 'Land': 'Land', 'Self Storage': 'Self Storage',
+     'Mobile Home Park': 'Mobile Home Park', 'Senior Living': 'Senior Living', 'Special Purpose': 'Special Purpose',
+     'Note/Loan': 'Note/Loan'}
+    }
 
-# Click the checkbox to select the option
-property_type_checkbox.click()
 
-# Output the label (optional)
-print(property_type_label.text)
+        print(f"search_type: {search_type}")
+        print(f"cateogry: {category}")
+
+        def get_value_by_type_and_key(search_type, key):
+            if search_type in category_mappings and key in category_mappings[search_type]:
+                return category_mappings[search_type][key]
+            else:
+                return None
+
+        category_name = get_value_by_type_and_key(search_type, category)
+
+        url = "https://www.crexi.com/"
+        # Construct the URL
+        if search_type == 'forLease':
+            url = url + f"lease/properties?types%5B%5D={category_name}"
+        elif search_type == 'forSale':
+            url = url + f"properties?types%5B%5D={category_name}"
+        else:
+            url = url + f"properties?tradingStatuses%5B%5D=Auction&types%5B%5D={category_name}"
+
+        print(f"Scraping {url}...")
 
 
-# Submit the search
-search_button = driver.find_element(By.CSS_SELECTOR, "crx-sales-search-form button.submit-button")
-search_button.click()
+        driver = webdriver.Chrome()
+        driver.get(url)
 
-# Wait for the search results to load
-WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "search-results")))
 
-# Get the search results
-search_results = driver.find_elements(By.CSS_SELECTOR, "search-result")
+        print("Before response...")
+        # Make the request with the selected proxy and parameters
+        client = ZenRowsClient("e810791d06d06c2bba5a8ee7696f03d65385c0cd")
+        # url = "https://www.loopnet.com/"
+        params = {"autoparse": "true"}
 
-# Process the search results as needed
-for result in search_results:
-    print("Processing search result...")
-    print(result.text)
-    # Extract relevant information from each search result
-    # and perform desired actions
+        response = client.get(url, params=params)
 
-# Close the browser
-driver.quit()
+        # print(response.text)
+        print("After response...")
+        response.raise_for_status()
+
+
+        json_data = json.loads("".join(response.text))
+        modified_data = remove_at_symbols(json_data)
+
+        print(f"modified_data: {modified_data}\n\n")
+
+        listings = []
+        csv_listings = []
+        item = modified_data[1]
+
+        if search_type == 'auctions':
+            print("yes it iis auctions")
+
+        print(f"search_type: {search_type}\n\n")
+
+
+
+        if search_type == 'forLease' or search_type == 'forSale':
+            if item:
+                for key, value in item.items():
+                    if key == 'about':
+                        # print(f"Value: {value}\n\n")
+                        for i in value:
+                            print(f"i: {i}\n\n")
+                            for key, value in i['item'].items():
+                                if 'availableAtOrFrom' in i['item']:
+                                    if 'address' in i['item']['availableAtOrFrom']:
+                                        if 'streetAddress' in i['item']['availableAtOrFrom']['address']:
+                                            address = i['item']['availableAtOrFrom']['address']['streetAddress']
+                                            locality = i['item']['availableAtOrFrom']['address']['addressLocality']
+                                            region = i['item']['availableAtOrFrom']['address']['addressRegion']
+                                            print(f"i val: {address}\n\n")
+                                            listing = {
+                                                'name': i['item']['name'],
+                                                'description': i['item']['description'],
+                                                'url': i['item']['url'],
+                                                'image': i['item']['image'],
+                                                'address': address,
+                                                'locality': locality,
+                                                'region': region
+                                            }
+                                            if listing not in listings:
+                                                listings.append(listing)
+
+        elif search_type == 'auction':
+            if modified_data:
+                for item in modified_data:
+                    for key, value in item.items():
+                        print(f"Key: {key}\n\n")
+                        if key == 'about':
+                            # print(f"Value: {value}\n\n")
+                            for i in value:
+                                # print(f"i: {i}\n\n")
+                                for key, value in i['item'].items():
+                                    listing = {
+                                    'type': i['item']['type'],
+                                    'name': i['item']['name'],
+                                    'description': i['item']['description'],
+                                    'url': i['item']['url'],
+                                    'image': i['item']['image'],
+                                    'category': i['item']['category'],
+                                    'address': i['item']['availableAtOrFrom']['address']['streetAddress'],
+                                    'locality': i['item']['availableAtOrFrom']['address']['addressLocality'],
+                                    'region': i['item']['availableAtOrFrom']['address']['addressRegion'],
+                                    'offered_by': i['item']['offeredBy'][0]['name'],
+                                    'offered_by_job_title': i['item']['offeredBy'][0]['jobTitle'],
+                                    'works_for': i['item']['offeredBy'][0]['worksFor']['name']
+                                    }
+                                    if listing not in listings:
+                                        listings.append(listing)
+        elif search_type == 'BBSType':
+            listings = BBS(modified_data[3])
+
+
+        return listings
+
+def BBS(response):
+    url = "https://www.loopnet.com"
+    listings = []
+    csv_listings = []
+    bbs = response
+    print(f"url: {url}\n\n")
+    # print(f"bbs: {bbs}\n\n")
+    print("-------------------------------------------end bbs-------------------------------------------")
+    for key, value in bbs.items():
+            # print(f"key: {key}\n\n")
+            # print(f"value: {value}\n\n")
+            if key == 'csr':
+                for i in value:
+                    # print(f"i: {i}\n\n")
+                    # for kii, vii in i.items():
+                    # print(f"vii: {vii}\n\n")
+                    # print(f"kii: {kii}\n\n")
+                    listing = {
+                        'url':url + i['urlStub'],
+                        'listNumber': i['listNumber'],
+                        'header': i['header'],
+                        'description': i['description'],
+                        'price': i['price'],
+                        'image': url + i['img'][0],
+                        'location': i['location'],
+                        'cashFlow': i['cashFlow'],
+                        'Contact_name': i['contactInfo']['contactFullName'],
+                        'Contact_phone': i['contactInfo']['contactPhoneNumber']['telephone']
+                    }
+                    if listing not in listings:
+                        listings.append(listing)
+
+
+    # print(f"\n\nListings:", listings)
+    return listings
+
+def remove_at_symbols(obj):
+    if isinstance(obj, dict):
+        modified_obj = {}
+        for key, value in obj.items():
+            modified_key = key.replace("@", "")
+            modified_value = remove_at_symbols(value)
+            modified_obj[modified_key] = modified_value
+        return modified_obj
+    elif isinstance(obj, list):
+        modified_obj = []
+        for item in obj:
+            modified_item = remove_at_symbols(item)
+            modified_obj.append(modified_item)
+        return modified_obj
+    else:
+        return obj
+
+
+def find_value(data, target):
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if value == target:
+                return value
+            elif isinstance(value, (dict, list)):
+                result = find_value(value, target)
+                if result:
+                    return result
+    elif isinstance(data, list):
+        for item in data:
+            result = find_value(item, target)
+            if result:
+                return result
+
+    return None

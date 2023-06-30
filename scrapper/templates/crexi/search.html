@@ -1,0 +1,75 @@
+<!-- search.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search</title>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const searchTypeSelect = document.getElementById('search-type');
+            const propertyTypeForLeaseInput = document.getElementById('propertytypeforlease');
+            const propertyTypeForSaleInput = document.getElementById('propertytypeforsale');
+            const propertyTypeForLeaseOptions = ["Office","Retail", "Industrial", "Land", "Special Purpose", "Restaurant"];
+            const propertyTypeForSaleOptions = ["Office","Retail","Multifamily", "Industrial", "Mixed Use", "Hospitality", "Land", "Self Storage", "Mobile Home Park", "Senior Living", "Special Purpose", "Note/Loan"];
+
+
+            function handleSearchTypeChange() {
+                const selectedValue = searchTypeSelect.value;
+
+                propertyTypeForLeaseInput.style.display = selectedValue === 'forLease' ? 'block' : 'none';
+                propertyTypeForSaleInput.style.display = selectedValue === 'forSale' ? 'block' : 'none';
+
+                if (selectedValue === 'forLease') {
+                    populateOptions(propertyTypeForLeaseInput, propertyTypeForLeaseOptions);
+                } else if (selectedValue === 'forSale') {
+                    populateOptions(propertyTypeForSaleInput, propertyTypeForSaleOptions);
+                } else if (selectedValue === 'BBSType') {
+                    populateOptions(propertyTypeBBSInput, propertyTypeBBSCategories);
+                }
+            }
+
+            function populateOptions(inputElement, options) {
+                inputElement.innerHTML = '';
+                options.forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.textContent = option;
+                    inputElement.appendChild(optionElement);
+                });
+            }
+
+            searchTypeSelect.addEventListener('change', handleSearchTypeChange);
+            handleSearchTypeChange();
+        });
+    </script>
+</head>
+<body>
+    <h1>Search</h1>
+
+    <form id="search-form" method="POST" action="{% url 'scrapper:search_results_c' %}">
+        {% csrf_token %}
+
+        <label for="search-type">Search Type:</label>
+        <select id="search-type" name="search-type">
+            <option value="forLease">Lease</option>
+            <option value="forSale">Sale</option>
+            <option value="auction">Auctions</option>
+        </select>
+
+        <label for="propertytypeforlease" id="propertytypeforlease-label" style="display: none;">Property Name:</label>
+        <select id="propertytypeforlease" name="propertytypeforlease" style="display: none;"></select>
+
+        <label for="propertytypeforsale" id="propertytypeforsale-label" style="display: none;">Property Name:</label>
+        <select id="propertytypeforsale" name="propertytypeforsale" style="display: none;"></select>
+
+
+        <br><br>
+
+        <label for="geography">Location:</label>
+        <input type="text" id="geography" name="geography">
+
+        <br><br>
+
+        <input type="submit" value="Search">
+    </form>
+</body>
+</html>
