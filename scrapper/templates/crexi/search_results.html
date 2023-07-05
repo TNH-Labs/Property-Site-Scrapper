@@ -9,38 +9,30 @@
 
     {% if scraped_data %}
     <a href="{% url 'scrapper:download_csv' %}" class="btn btn-primary">Download CSV</a>
-        <ul>
-            {% for listing in scraped_data %}
-                {% for list in listing %}
-
-                    <li>
-                    <h2>{{ list.name }}</h2>
-                    <p>Location: {{ list.address }} - Locality: {{list.locality}}</p>
-                        <p>Region: {{list.region}}</p>
-
-                    <p>Description: {{ list.description }}</p>
-                    <p>URL: <a href="{{ list.url }}">{{ list.url }}</a></p>
-                    <img src="{{ list.image }}" alt="Listing Image">
-                    {% if list.price %}
-                        <p>Price: {{ listing.price }}</p>
-                    {% endif %}
-                    {% if list.available_at %}
-                        <p>Available at: {{ listing.available_at }}</p>
-                    {% endif %}
-                    {% if list.offered_by %}
-                        <p>Offered by: {{ listing.offered_by }}</p>
-                    {% endif %}
-                    {% for key, value in listing.items %}
-                        {% if key|slice:"0" == "@" %}
-                            <p>{{ key|slice:"1" }}: {{ value }}</p>
-                        {% endif %}
-                    {% endfor %}
-
-
-                    </li>
-                {% endfor %}
+        <table>
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Price</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Address</th>
+                <th>View OM Button</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in scraped_data %}
+            <tr>
+                <td><img src="{{ item.image_url }}" width="150" height="100"></td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.title }}</td>
+                <td>{{ item.description }}</td>
+                <td>{{ item.address }}</td>
+                <td>{% if item.view_om_button %}Available{% else %}Not Available{% endif %}</td>
+            </tr>
             {% endfor %}
-        </ul>
+        </tbody>
+    </table>
     {% else %}
         <p>No results found.</p>
     {% endif %}

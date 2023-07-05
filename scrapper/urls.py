@@ -11,7 +11,7 @@ urlpatterns = [
     path('search_crexi_results/', views.crexi, name='search_results_c'),
     path('search_results/download-csv/', views.csv_loopnet, name='download_csv'),
     path('search_Showcase/', views.showcase, name='search_Showcase'),
-    path('search_crexi/', views.showcase, name='search_Crexi'),
+    path('search_crexi/', views.crexi, name='search_Crexi'),
 
 
 

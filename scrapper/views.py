@@ -5,8 +5,8 @@ import requests
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from .CSV import save_dict_to_csv
 from .ShowCase.main import scrape_showcase
+from .crexi.test import scrape_crexi
 from .loopnet.main import *
 
 global scraped_data
@@ -88,6 +88,7 @@ def showcase(request):
             property_name = request.POST.get('propertytypeforsale')
 
         location = request.POST.get('geography')
+        print("accessing showcase")
 
         scraped_data = scrape_showcase(search_type, property_name, location)
         request.session['scrapdata'] = scraped_data
@@ -107,19 +108,26 @@ def crexi(request):
         search_type = request.POST.get('search-type')
         property_name = None
         if search_type == 'forLease':
-            property_name = request.POST.get('propertytypeforrent')
+            property_name = request.POST.get('propertytypeforlease')
         elif search_type == 'forSale':
             property_name = request.POST.get('propertytypeforsale')
 
         location = request.POST.get('geography')
 
+        print(f"Search type: {search_type}")
+        print(f"Property name: {property_name}")
+        print(f"Location: {location}")
 
-        return render(request, 'Crexi/search_results.html', {
+        scraped_data = scrape_crexi(location, property_name, search_type)
+        request.session['scrapdata'] = scraped_data
+
+
+        return render(request, 'crexi/search_results.html', {
             'search_type': search_type,
             'property_name': property_name,
             'location': location,
             'scraped_data': [scraped_data],
         })
 
-    return render(request, 'Crexi/search.html')
+    return render(request, 'crexi/search.html')
 
