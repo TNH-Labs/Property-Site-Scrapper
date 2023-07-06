@@ -8,8 +8,10 @@
             const searchTypeSelect = document.getElementById('search-type');
             const propertyTypeForLeaseInput = document.getElementById('propertytypeforlease');
             const propertyTypeForSaleInput = document.getElementById('propertytypeforsale');
+            const propertyTypeBBSInput = document.getElementById('propertytypebbs');
             const propertyTypeForLeaseOptions = ["Office","Retail", "Industrial", "Land", "Special Purpose", "Restaurant"];
             const propertyTypeForSaleOptions = ["Office","Retail","Multifamily", "Industrial", "Mixed Use", "Hospitality", "Land", "Self Storage", "Mobile Home Park", "Senior Living", "Special Purpose", "Note/Loan"];
+            const propertyTypeForBbsOptions = ["Office","Retail","Multifamily", "Industrial", "Mixed Use", "Hospitality", "Land", "Self Storage", "Mobile Home Park", "Senior Living", "Special Purpose", "Note/Loan"];
 
 
             function handleSearchTypeChange() {
@@ -17,13 +19,14 @@
 
                 propertyTypeForLeaseInput.style.display = selectedValue === 'forLease' ? 'block' : 'none';
                 propertyTypeForSaleInput.style.display = selectedValue === 'forSale' ? 'block' : 'none';
+                propertyTypeBBSInput.style.display = selectedValue === 'auction' ? 'block' : 'none';
 
                 if (selectedValue === 'forLease') {
                     populateOptions(propertyTypeForLeaseInput, propertyTypeForLeaseOptions);
                 } else if (selectedValue === 'forSale') {
                     populateOptions(propertyTypeForSaleInput, propertyTypeForSaleOptions);
-                } else if (selectedValue === 'BBSType') {
-                    populateOptions(propertyTypeBBSInput, propertyTypeBBSCategories);
+                } else if (selectedValue === 'auction') {
+                    populateOptions(propertyTypeBBSInput, propertyTypeForBbsOptions);
                 }
             }
 
@@ -60,6 +63,9 @@
 
         <label for="propertytypeforsale" id="propertytypeforsale-label" style="display: none;">Property Name:</label>
         <select id="propertytypeforsale" name="propertytypeforsale" style="display: none;"></select>
+
+        <label for="propertytypebbs" id="propertytypebbs-label" style="display: none;">Property Name:</label>
+        <select id="propertytypebbs" name="propertytypebbs" style="display: none;"></select>
 
 
         <br><br>

@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 from .ShowCase.main import scrape_showcase
-from .crexi.test import scrape_crexi
+from .crexi.main import scrape_crexi
 from .loopnet.main import *
 
 global scraped_data
@@ -111,6 +111,8 @@ def crexi(request):
             property_name = request.POST.get('propertytypeforlease')
         elif search_type == 'forSale':
             property_name = request.POST.get('propertytypeforsale')
+        elif search_type == 'auction':
+            property_name = request.POST.get('propertytypebbs')
 
         location = request.POST.get('geography')
 

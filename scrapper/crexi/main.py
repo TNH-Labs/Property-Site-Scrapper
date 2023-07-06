@@ -1,218 +1,260 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from bs4 import BeautifulSoup
-from bs4 import BeautifulSoup
-import json
-import random
 import re
-from zenrows import ZenRowsClient
 
-from ..CSV import save_dict_to_csv
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+import pyautogui as pg
+import json
+# import pyperclip as pc
+# from utils import handle_exception
 
-
-
-
-def scrape_crexi(search_type, category, location):
-    # try:
-        # Perform scraping based on the selected search type and form data
-        print("\n\nScraping LoopNet...")
-        print(f"Search type: {search_type}")
-        print(f"Property name: {category}")
-        print(f"Location: {location}\n\n")
-        category_mappings = {
-            'Lease':
-                {'Office': 'Office', 'Retail': 'Retail', 'Industrial': 'Industrial', 'Land': 'Land',
-     'Special Purpose': 'Special Purpose', 'Restaurant': 'Restaurant'},
-    'Sale':
-        {'Office': 'Office', 'Retail': 'Retail', 'Multifamily': 'Multifamily', 'Industrial': 'Industrial',
-     'Mixed Use': 'Mixed Use', 'Hospitality': 'Hospitality', 'Land': 'Land', 'Self Storage': 'Self Storage',
-     'Mobile Home Park': 'Mobile Home Park', 'Senior Living': 'Senior Living', 'Special Purpose': 'Special Purpose',
-     'Note/Loan': 'Note/Loan'}
-    }
-
-
-        print(f"search_type: {search_type}")
-        print(f"cateogry: {category}")
-
-        def get_value_by_type_and_key(search_type, key):
-            if search_type in category_mappings and key in category_mappings[search_type]:
-                return category_mappings[search_type][key]
-            else:
-                return None
-
-        category_name = get_value_by_type_and_key(search_type, category)
-
-        url = "https://www.crexi.com/"
-        # Construct the URL
-        if search_type == 'forLease':
-            url = url + f"lease/properties?types%5B%5D={category_name}"
-        elif search_type == 'forSale':
-            url = url + f"properties?types%5B%5D={category_name}"
-        else:
-            url = url + f"properties?tradingStatuses%5B%5D=Auction&types%5B%5D={category_name}"
-
-        print(f"Scraping {url}...")
+def scrape_crexi(location, category, search_type):
+    try:
+        service_ = Service(executable_path=r'Properapper/driver')
+        option = Options()
+        # option.add_argument("--headless")
+        option.add_argument("--disable-infobars")
+        # option.add_argument("start-maximized")
+        option.add_argument("--disable-extensions")
+        option.add_argument("--disable-notifications")
+        option.add_argument('--ignore-certificate-errors')
+        option.add_argument('--ignore-ssl-errors')
+        # option.add_experimental_option('excludeSwitches', ['enable-   logging'])
 
 
-        driver = webdriver.Chrome()
+
+        driver = webdriver.Chrome(options=option, service=service_)
+        driver.set_window_rect(width=1500, height=1000)
+        print(f"Scraping {search_type} {category} in {location}...")
+        url = ""
+        if search_type == "forSale":
+            url = f"https://www.crexi.com/properties?types%5B%5D={category}"
+        elif search_type == "forLease":
+            url = f"https://www.crexi.com/lease/properties?types%5B%5D={category}"
+        elif search_type == "auction":
+            url = f"https://www.crexi.com/properties?tradingStatuses%5B%5D=Auction&types%5B%5D={category}"
+
+
+
+        print("url: ",url)
         driver.get(url)
+        window_width = driver.execute_script("return window.innerWidth;")
+        window_height = driver.execute_script("return window.innerHeight;")
 
+        # Print the width and height
+        print("Window Width:", window_width)
+        print("Window Height:", window_height)
 
-        print("Before response...")
-        # Make the request with the selected proxy and parameters
-        client = ZenRowsClient("e810791d06d06c2bba5a8ee7696f03d65385c0cd")
-        # url = "https://www.loopnet.com/"
-        params = {"autoparse": "true"}
+        try:
+            pop_up = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "mat-dialog-container"))
+            )
 
-        response = client.get(url, params=params)
+            # Close the pop-up by clicking on the close button
+            close_button = pop_up.find_element(By.CSS_SELECTOR, "button.cui-modal-close")
+            close_button.click()
 
-        # print(response.text)
-        print("After response...")
-        response.raise_for_status()
+        except Exception as e:
+            print(e)
+            # If the pop-up does not appear, continue with scraping the main content
+            pass
 
+        # Wait for the search box to be clickable
+        search_box = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH,
+                                        "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-header/crx-header-content/div/div[1]/crx-header-typeahead-search/crx-mobile-search/div/div[4]/div/div/crx-search-bar-pills/form/div"))
+        )
 
-        json_data = json.loads("".join(response.text))
-        modified_data = remove_at_symbols(json_data)
+        search_box.click()
 
-        print(f"modified_data: {modified_data}\n\n")
+        # Click on the search box using JavaScript
+        driver.execute_script("arguments[0].click();", search_box)
 
-        listings = []
-        csv_listings = []
-        item = modified_data[1]
+        driver.find_element(By.XPATH,
+                            "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-header/crx-header-content/div/div[1]/crx-header-typeahead-search/crx-mobile-search/div/div[4]/div/div/crx-search-bar-pills/form/div/div/input").send_keys(
+            f"{location}")
+        time.sleep(2)
 
-        if search_type == 'auctions':
-            print("yes it iis auctions")
+        pg.press('enter')
+        time.sleep(7)
 
-        print(f"search_type: {search_type}\n\n")
+        # Replace the XPath with the correct one for your element
+        element_xpath = "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/article/div/div/crx-search-grid-view/div/crx-search-grid/div/div/div[1]/crx-search-results/div/div"
 
+        try:
+            pop_up = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "mat-dialog-container"))
+            )
 
+            # Close the pop-up by clicking on the close button
+            close_button = pop_up.find_element(By.CSS_SELECTOR, "button.cui-modal-close")
+            close_button.click()
 
-        if search_type == 'forLease' or search_type == 'forSale':
-            if item:
-                for key, value in item.items():
-                    if key == 'about':
-                        # print(f"Value: {value}\n\n")
-                        for i in value:
-                            print(f"i: {i}\n\n")
-                            for key, value in i['item'].items():
-                                if 'availableAtOrFrom' in i['item']:
-                                    if 'address' in i['item']['availableAtOrFrom']:
-                                        if 'streetAddress' in i['item']['availableAtOrFrom']['address']:
-                                            address = i['item']['availableAtOrFrom']['address']['streetAddress']
-                                            locality = i['item']['availableAtOrFrom']['address']['addressLocality']
-                                            region = i['item']['availableAtOrFrom']['address']['addressRegion']
-                                            print(f"i val: {address}\n\n")
-                                            listing = {
-                                                'name': i['item']['name'],
-                                                'description': i['item']['description'],
-                                                'url': i['item']['url'],
-                                                'image': i['item']['image'],
-                                                'address': address,
-                                                'locality': locality,
-                                                'region': region
-                                            }
-                                            if listing not in listings:
-                                                listings.append(listing)
+        except Exception as e:
+            print(e)
+            # If the pop-up does not appear, continue with scraping the main content
+            pass
 
-        elif search_type == 'auction':
-            if modified_data:
-                for item in modified_data:
-                    for key, value in item.items():
-                        print(f"Key: {key}\n\n")
-                        if key == 'about':
-                            # print(f"Value: {value}\n\n")
-                            for i in value:
-                                # print(f"i: {i}\n\n")
-                                for key, value in i['item'].items():
-                                    listing = {
-                                    'type': i['item']['type'],
-                                    'name': i['item']['name'],
-                                    'description': i['item']['description'],
-                                    'url': i['item']['url'],
-                                    'image': i['item']['image'],
-                                    'category': i['item']['category'],
-                                    'address': i['item']['availableAtOrFrom']['address']['streetAddress'],
-                                    'locality': i['item']['availableAtOrFrom']['address']['addressLocality'],
-                                    'region': i['item']['availableAtOrFrom']['address']['addressRegion'],
-                                    'offered_by': i['item']['offeredBy'][0]['name'],
-                                    'offered_by_job_title': i['item']['offeredBy'][0]['jobTitle'],
-                                    'works_for': i['item']['offeredBy'][0]['worksFor']['name']
-                                    }
-                                    if listing not in listings:
-                                        listings.append(listing)
-        elif search_type == 'BBSType':
-            listings = BBS(modified_data[3])
+        time.sleep(20)
+        try:
+            wait = WebDriverWait(driver, 10)
+            element = wait.until(EC.element_to_be_clickable((By.ID, "mat-mdc-slide-toggle-1-button")))
+            element.click()
+        except:
+            b = driver.find_element(By.ID, "mat-mdc-slide-toggle-1-button")
+            driver.execute_script("arguments[0].click();", b)
 
+        path = "//a[@class='cover-link'][position()=1]"
 
-        return listings
+        main = "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/article/div/div/crx-search-grid-view/div/crx-search-grid/div/div/div[1]/crx-search-results/div/div/crx-property-tile-aggregate"
+        all = "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/article/div/div/crx-search-grid-view/div/crx-search-grid/div/div/div[1]/crx-search-results"
+        # listing_element = driver.find_element(By.XPATH, all )
+        wait = WebDriverWait(driver, 15)
+        listing_element = wait.until(EC.presence_of_element_located((By.XPATH, "//a[@class='cover-link'][position()=1]")))
+        print(f"Found {listing_element} listing element")
 
-def BBS(response):
-    url = "https://www.loopnet.com"
-    listings = []
-    csv_listings = []
-    bbs = response
-    print(f"url: {url}\n\n")
-    # print(f"bbs: {bbs}\n\n")
-    print("-------------------------------------------end bbs-------------------------------------------")
-    for key, value in bbs.items():
-            # print(f"key: {key}\n\n")
-            # print(f"value: {value}\n\n")
-            if key == 'csr':
-                for i in value:
-                    # print(f"i: {i}\n\n")
-                    # for kii, vii in i.items():
-                    # print(f"vii: {vii}\n\n")
-                    # print(f"kii: {kii}\n\n")
-                    listing = {
-                        'url':url + i['urlStub'],
-                        'listNumber': i['listNumber'],
-                        'header': i['header'],
-                        'description': i['description'],
-                        'price': i['price'],
-                        'image': url + i['img'][0],
-                        'location': i['location'],
-                        'cashFlow': i['cashFlow'],
-                        'Contact_name': i['contactInfo']['contactFullName'],
-                        'Contact_phone': i['contactInfo']['contactPhoneNumber']['telephone']
-                    }
-                    if listing not in listings:
-                        listings.append(listing)
+        pathh = "//a[@class='cover-link']"
 
+        # Find all elements matching the XPath expression
+        project_links = listing_element.find_elements(By.XPATH, pathh)
 
-    # print(f"\n\nListings:", listings)
-    return listings
+        # Function to scroll within a specific element
+        def scroll_within_element(driver, element):
+            last_height = driver.execute_script("return arguments[0].scrollHeight", element)
+            while True:
+                # Perform scroll action using ActionChains within the specified element
+                actions = ActionChains(driver)
+                actions.move_to_element(element).send_keys(Keys.END).perform()
+                time.sleep(2)  # Adjust the waiting time based on your page loading speed
+                new_height = driver.execute_script("return arguments[0].scrollHeight", element)
+                if new_height == last_height:
+                    break
+                last_height = new_height
 
-def remove_at_symbols(obj):
-    if isinstance(obj, dict):
-        modified_obj = {}
-        for key, value in obj.items():
-            modified_key = key.replace("@", "")
-            modified_value = remove_at_symbols(value)
-            modified_obj[modified_key] = modified_value
-        return modified_obj
-    elif isinstance(obj, list):
-        modified_obj = []
-        for item in obj:
-            modified_item = remove_at_symbols(item)
-            modified_obj.append(modified_item)
-        return modified_obj
-    else:
-        return obj
+        def scroll_to_element(driver, element):
+            # driver.execute_script("arguments[0].scrollIntoView(true);", element)
+            # driver.execute_script("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element)
+            viewport_height = driver.execute_script("return window.innerHeight")
 
+            # Get the height of the element
+            element_height = element.size["height"]
 
-def find_value(data, target):
-    if isinstance(data, dict):
-        for key, value in data.items():
-            if value == target:
-                return value
-            elif isinstance(value, (dict, list)):
-                result = find_value(value, target)
-                if result:
-                    return result
-    elif isinstance(data, list):
-        for item in data:
-            result = find_value(item, target)
-            if result:
-                return result
+            # Calculate the number of times to scroll to fully reveal the element
+            num_scrolls = element_height // viewport_height + 1
 
-    return None
+            # Execute JavaScript to scroll the element into view incrementally
+            for _ in range(num_scrolls):
+                time.sleep(0.2)
+                driver.execute_script("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element)
+
+        # Main XPath for the element containing the items
+        main_xpath = "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/article/div/div/crx-search-grid-view/div/crx-search-grid/div"
+        p = "//div[@class='properties-holder properties-holder-map ng-star-inserted']"
+        pp = "//div[@class='cls-guard']"
+        # Find the main element
+
+        main_element = driver.find_element(By.XPATH, pp)
+
+        print(f"\n\n main element: {main_element}")
+
+        # Scroll within the main element to load all items
+        scroll_to_element(driver, main_element)
+
+        # Find all item elements
+        time.sleep(5)
+        item_elements = main_element.find_elements(By.XPATH, ".//crx-search-results/div/div/crx-property-tile-aggregate")
+
+        print(f"\n\n item elements: {item_elements}")
+        for item_element in item_elements:
+            # Relative XPath for the div element containing the background image URL
+            try:
+                image_xpath = ".//gallery-item[@class='ng-star-inserted']//gallery-image//div[contains(@class, 'g-image-item')]"
+                div_element = item_element.find_element(By.XPATH, image_xpath)
+                print(f"\n\n div element: {div_element}")
+                style_attribute = div_element.get_attribute('style')
+                image_url = re.search(r"url\(\"(.*?)\"\)", style_attribute).group(1)
+                print(f"Image URL: {image_url}")
+            except Exception as e:
+                pass
+
+        """
+        for index, link in enumerate(project_links, start=1):
+            project_url = link.get_attribute('href')
+            print(f"Found project URL {index}: {project_url}")
+    
+        """
+
+        html_response = driver.page_source
+
+        soup = BeautifulSoup(html_response, 'html.parser')
+
+        # Find the container element that holds the listings
+        listings_container = soup.find('crx-search-results')
+        # print(f"Found {listings_container} listings container")
+
+        # Find all the listing elements within the container
+        listings = listings_container.find_all('crx-property-tile-aggregate')
+        # print(f"Found {listings} listings")
+        # print(listings)
+        # Loop through the listings and extract the desired information
+        item_data = []  # List to store the item details
+
+        for index, link in enumerate(project_links, start=1):
+            project_url = link.get_attribute('href')
+            print(f"Found project URL {index}: {project_url}")
+
+            listing = listings[index - 1]  # Get the corresponding listing element
+
+            # Extract the details from each listing element
+            try:
+                image_url = listing.find('img', {'class': 'ng-lazyloaded'})['src']
+            except:
+                image_url = None
+
+            if image_url is not None:
+                price = listing.find('span', {'class': 'price'}).text.strip()
+                title = listing.find('h5', {'class': 'property-name'}).text.strip()
+                description = listing.find('div', {'class': 'property-details'}).text.strip()
+                address = listing.find('h4', {'class': 'property-address'}).text.strip()
+                view_om_button = listing.find('span', text='View OM')
+
+                # Create a dictionary to store the item details
+                item = {
+                    'image_url': image_url,
+                    'price': price,
+                    'title': title,
+                    'description': description,
+                    'address': address,
+                    'view_om_button': view_om_button is not None,
+                    'url': project_url
+                }
+
+                item_data.append(item)
+
+        # Print the item details
+        for item in item_data:
+            print('Image URL:', item['image_url'])
+            print('Price:', item['price'])
+            print('Title:', item['title'])
+            print('Description:', item['description'])
+            print('Address:', item['address'])
+            if item['view_om_button']:
+                print('View OM Button: Available')
+            else:
+                print('View OM Button: Not Available')
+            print('---')
+
+        # Close the browser
+        driver.quit()
+
+        return item_data
+    except Exception as e:
+        print(e)
+        return None

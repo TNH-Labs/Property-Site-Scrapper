@@ -18,18 +18,22 @@
                 <th>Description</th>
                 <th>Address</th>
                 <th>View OM Button</th>
+                <th>Link</th>
             </tr>
         </thead>
         <tbody>
-            {% for item in scraped_data %}
-            <tr>
-                <td><img src="{{ item.image_url }}" width="150" height="100"></td>
-                <td>{{ item.price }}</td>
-                <td>{{ item.title }}</td>
-                <td>{{ item.description }}</td>
-                <td>{{ item.address }}</td>
-                <td>{% if item.view_om_button %}Available{% else %}Not Available{% endif %}</td>
-            </tr>
+            {% for items in scraped_data %}
+                {% for item in items %}
+                <tr>
+                    <td><img src="{{ item.image_url }}" width="150" height="100"></td>
+                    <td>{{ item.price }}</td>
+                    <td>{{ item.title }}</td>
+                    <td>{{ item.description }}</td>
+                    <td>{{ item.address }}</td>
+                    <td>{% if item.view_om_button %}Available{% else %}Not Available{% endif %}</td>
+                    <td><a href="{{ item.url }}" target="_blank">Link</a></td>
+                </tr>
+                {% endfor %}
             {% endfor %}
         </tbody>
     </table>
