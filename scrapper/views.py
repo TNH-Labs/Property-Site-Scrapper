@@ -1,14 +1,11 @@
 # views.py
 import csv
-
 import requests
 from django.http import HttpResponse
 from django.shortcuts import render
-
 from .ShowCase.main import scrape_showcase
 from .crexi.main import scrape_crexi
 from .loopnet.main import *
-
 global scraped_data
 
 
@@ -16,13 +13,13 @@ def index(request):
     return render(request, 'index.html')
 
 
-def csv_loopnet(request):
+def Csv(request):
     data = request.session['scrapdata']
     updated_data = []
     for i in data:
         updated_dict = {}
         for key, value in i.items():
-            if key != 'image' and key != 'url':
+            if key != 'image' and key != 'url' and key != 'image_url' and key != 'img_url':
                 updated_dict[key] = value
         updated_data.append(updated_dict)
     keys = updated_data[0].keys()
@@ -55,9 +52,6 @@ def loopnet(request):
 
         request.session['scrapdata'] = scraped_data
 
-        # print(f"Scraped data: {scraped_data}...")
-
-        # Render the search results template with the scraped data
         if search_type == 'BBSType':
             return render(request, 'Loopnet/BBS.html', {
                 'listings': scraped_data
@@ -88,7 +82,6 @@ def showcase(request):
             property_name = request.POST.get('propertytypeforsale')
 
         location = request.POST.get('geography')
-        print("accessing showcase")
 
         scraped_data = scrape_showcase(search_type, property_name, location)
         request.session['scrapdata'] = scraped_data
@@ -115,10 +108,6 @@ def crexi(request):
             property_name = request.POST.get('propertytypebbs')
 
         location = request.POST.get('geography')
-
-        print(f"Search type: {search_type}")
-        print(f"Property name: {property_name}")
-        print(f"Location: {location}")
 
         scraped_data = scrape_crexi(location, property_name, search_type)
         request.session['scrapdata'] = scraped_data

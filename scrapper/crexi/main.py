@@ -15,24 +15,50 @@ import json
 # import pyperclip as pc
 # from utils import handle_exception
 
+
+import requests
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+# from .create_html_posts2 import save_html_post, get_post_element_from_pages
+
+
+
 def scrape_crexi(location, category, search_type):
+    # service_ = Service(executable_path=r'/scrapper/driver')
+    # option = Options()
+    # option.add_argument("--headless")
+    # option.add_argument("--disable-infobars")
+    # # option.add_argument("start-maximized")
+    # option.add_argument("--disable-extensions")
+    # option.add_argument("--disable-notifications")
+    # option.add_argument('--ignore-certificate-errors')
+    # option.add_argument('--ignore-ssl-errors')
+    # option.add_experimental_option('excludeSwitches', ['enable-   logging'])
+
+    option = Options()
+    option.add_argument("--window-size=1920,1080")
+    option.add_argument("--start-maximized")
+    # option.add_argument("--headless")
+    # option.add_argument('--disable-blink-features=AutomationControlled')
+    option.add_argument("--disable-infobars")
+    option.add_argument("start-maximized")
+    option.add_argument("--disable-extensions")
+    option.add_argument("--disable-notifications")
+    option.add_experimental_option('excludeSwitches', ['enable-logging'])
+
+    driver = webdriver.Chrome("./chromedriver.exe", options=option)
+
+
+
+    # driver = webdriver.Chrome(options=option, service=service_)
+    # driver.set_window_rect(width=1500, height=1000)
     try:
-        service_ = Service(executable_path=r'Properapper/driver')
-        option = Options()
-        # option.add_argument("--headless")
-        option.add_argument("--disable-infobars")
-        # option.add_argument("start-maximized")
-        option.add_argument("--disable-extensions")
-        option.add_argument("--disable-notifications")
-        option.add_argument('--ignore-certificate-errors')
-        option.add_argument('--ignore-ssl-errors')
-        # option.add_experimental_option('excludeSwitches', ['enable-   logging'])
-
-
-
-        driver = webdriver.Chrome(options=option, service=service_)
-        driver.set_window_rect(width=1500, height=1000)
-        print(f"Scraping {search_type} {category} in {location}...")
+        # print(f"Scraping {search_type} {category} in {location}...")
         url = ""
         if search_type == "forSale":
             url = f"https://www.crexi.com/properties?types%5B%5D={category}"
@@ -43,14 +69,14 @@ def scrape_crexi(location, category, search_type):
 
 
 
-        print("url: ",url)
+        # print("url: ",url)
         driver.get(url)
         window_width = driver.execute_script("return window.innerWidth;")
         window_height = driver.execute_script("return window.innerHeight;")
 
         # Print the width and height
-        print("Window Width:", window_width)
-        print("Window Height:", window_height)
+        # print("Window Width:", window_width)
+        # print("Window Height:", window_height)
 
         try:
             pop_up = WebDriverWait(driver, 5).until(
@@ -118,25 +144,13 @@ def scrape_crexi(location, category, search_type):
         # listing_element = driver.find_element(By.XPATH, all )
         wait = WebDriverWait(driver, 15)
         listing_element = wait.until(EC.presence_of_element_located((By.XPATH, "//a[@class='cover-link'][position()=1]")))
-        print(f"Found {listing_element} listing element")
+        # print(f"Found {listing_element} listing element")
 
         pathh = "//a[@class='cover-link']"
 
         # Find all elements matching the XPath expression
         project_links = listing_element.find_elements(By.XPATH, pathh)
 
-        # Function to scroll within a specific element
-        def scroll_within_element(driver, element):
-            last_height = driver.execute_script("return arguments[0].scrollHeight", element)
-            while True:
-                # Perform scroll action using ActionChains within the specified element
-                actions = ActionChains(driver)
-                actions.move_to_element(element).send_keys(Keys.END).perform()
-                time.sleep(2)  # Adjust the waiting time based on your page loading speed
-                new_height = driver.execute_script("return arguments[0].scrollHeight", element)
-                if new_height == last_height:
-                    break
-                last_height = new_height
 
         def scroll_to_element(driver, element):
             # driver.execute_script("arguments[0].scrollIntoView(true);", element)
@@ -162,7 +176,7 @@ def scrape_crexi(location, category, search_type):
 
         main_element = driver.find_element(By.XPATH, pp)
 
-        print(f"\n\n main element: {main_element}")
+        # print(f"\n\n main element: {main_element}")
 
         # Scroll within the main element to load all items
         scroll_to_element(driver, main_element)
@@ -171,16 +185,16 @@ def scrape_crexi(location, category, search_type):
         time.sleep(5)
         item_elements = main_element.find_elements(By.XPATH, ".//crx-search-results/div/div/crx-property-tile-aggregate")
 
-        print(f"\n\n item elements: {item_elements}")
+        # print(f"\n\n item elements: {item_elements}")
         for item_element in item_elements:
             # Relative XPath for the div element containing the background image URL
             try:
                 image_xpath = ".//gallery-item[@class='ng-star-inserted']//gallery-image//div[contains(@class, 'g-image-item')]"
                 div_element = item_element.find_element(By.XPATH, image_xpath)
-                print(f"\n\n div element: {div_element}")
+                # print(f"\n\n div element: {div_element}")
                 style_attribute = div_element.get_attribute('style')
                 image_url = re.search(r"url\(\"(.*?)\"\)", style_attribute).group(1)
-                print(f"Image URL: {image_url}")
+                # print(f"Image URL: {image_url}")
             except Exception as e:
                 pass
 
@@ -192,6 +206,15 @@ def scrape_crexi(location, category, search_type):
         """
 
         html_response = driver.page_source
+        print(f"HTML response: {html_response}....")
+        """
+        another = driver.find_elements(By.XPATH, "//crx-property-tile-aggregate[@class='ng-star-inserted']")
+        print(f"another: {another.text}")
+        for i in another:
+            print(f"another: {i.text}")
+        
+        """
+
 
         soup = BeautifulSoup(html_response, 'html.parser')
 
@@ -239,6 +262,7 @@ def scrape_crexi(location, category, search_type):
                 item_data.append(item)
 
         # Print the item details
+        """
         for item in item_data:
             print('Image URL:', item['image_url'])
             print('Price:', item['price'])
@@ -250,6 +274,8 @@ def scrape_crexi(location, category, search_type):
             else:
                 print('View OM Button: Not Available')
             print('---')
+            
+        """
 
         # Close the browser
         driver.quit()
@@ -257,4 +283,5 @@ def scrape_crexi(location, category, search_type):
         return item_data
     except Exception as e:
         print(e)
+        driver.quit()
         return None
