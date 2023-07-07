@@ -10,8 +10,14 @@ def scrape_showcase(search_type, category, location):
         # Perform scraping based on the selected search type and form data
         print("\n\nScraping LoopNet...")
         print(f"Search type: {search_type}")
-        print(f"Property name: {category}")
+        print(f"Property name: '{category}'")
         print(f"Location: {location}\n\n")
+        if search_type == 'forSale':
+            search_type = 'For Sale'
+        else:
+            search_type = 'For Rent'
+
+
 
 
         category_mappings = {
@@ -51,14 +57,18 @@ def scrape_showcase(search_type, category, location):
                 return None
 
 
-        category_name = get_value_by_type_and_key(search_type, category)
+        category_name = get_value_by_type_and_key(search_type, "Retail Space")
         print(f"Category name: {category_name}")
 
+        location = replace_spaces_and_commas(location)
         # Construct the URL
-        if search_type == 'For Sale':
+        if search_type == 'forSale':
             url = f"https://www.showcase.com/{location}/{category_name}/for-sale/"
         else:
             url = f"https://www.showcase.com/{location}/{category_name}/for-rent/"
+
+        print(f"Scraping {url}...")
+
 
         print(f"Scraping {url}...")
 
@@ -128,3 +138,25 @@ def scrape_showcase(search_type, category, location):
 
 
         return listings
+
+
+def replace_spaces_and_commas(string):
+    # Split the string into words
+    words = string.split()
+
+    # If there are exactly two words
+    if len(words) == 2:
+        # Reverse the order and join with a slash
+        new_string = "/".join(words[::-1])
+    else:
+        # If there are more than two words, replace the comma with a dash
+        new_string = string.replace(",", "-")
+
+    if new_string[0] == "/":
+        print(f"new stirng = {new_string}")
+        # remove it
+        new_string = new_string[1] + new_string[2:]
+
+    print(f"new stirng = {new_string}")
+
+    return new_string

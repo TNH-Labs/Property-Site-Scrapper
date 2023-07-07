@@ -49,6 +49,7 @@ def loopnet(request):
 
         # Perform scraping using the form data
         scraped_data = scrape_loopnet(search_type, property_name, location)
+        print(f"Scraped data: {scraped_data}...")
 
         request.session['scrapdata'] = scraped_data
 
@@ -80,6 +81,8 @@ def showcase(request):
             property_name = request.POST.get('propertytypeforrent')
         elif search_type == 'forSale':
             property_name = request.POST.get('propertytypeforsale')
+
+        print(property_name, "property_name")
 
         location = request.POST.get('geography')
 

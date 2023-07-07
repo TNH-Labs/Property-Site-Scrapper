@@ -1,63 +1,38 @@
+<!-- search.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Scrap Showcase Website</title>
+    <title>Search</title>
     <script>
         window.addEventListener('DOMContentLoaded', (event) => {
             const searchTypeSelect = document.getElementById('search-type');
             const propertyTypeForLeaseInput = document.getElementById('propertytypeforrent');
             const propertyTypeForSaleInput = document.getElementById('propertytypeforsale');
-            const categoryMappings = {
-                "For Rent": {
-                    "All Spaces": "commercial-real-estate",
-                    "Office Space": "office-space",
-                    "Industrial and Warehouse Space": "warehouses",
-                    "Retail Space": "retail-space",
-                    "Restaurants": "restaurants",
-                    "Flex Space": "flex-space",
-                    "Medical Offices": "medical-offices",
-                    "Coworking Space": "coworking-space",
-                    "Land": "land"
-                },
-                "For Sale": {
-                    "All Property Types": "commercial-real-estate",
-                    "Office Space": "office-space",
-                    "Industrial Space": "industrial-space",
-                    "Retail Space": "retail-space",
-                    "Restaurants": "restaurants",
-                    "Multifamily Apartments": "apartment-buildings",
-                    "Hotels & Motels": "hotels",
-                    "Health Care Properties": "health-care-facilities",
-                    "Investment Properties": "investment-properties",
-                    "Land": "land",
-                    "Shopping Centers & Malls": "shopping-centers-malls",
-                    "Sports & Entertainment Properties": "sports-entertainment-properties",
-                    "Residential Income Properties": "residential-income-properties"
-                }
-            };
+            const propertyTypeForLeaseOptions = ["All Spaces", "Office Space", "Industrial and Warehouse Space", "Retail Space", "Restaurants", "Flex Space", "Medical Offices", "Coworking Space", "Land"];
+            const propertyTypeForSaleOptions = ["All Property Types", "Office Space", "Industrial Space", "Retail Space", "Restaurants", "Multifamily Apartments", "Hotels & Motels", "Health Care Properties", "Investment Properties", "Shopping Centers & Malls", "Land", "Sports & Entertainment Properties", "Residential Income Properties"];
+
 
             function handleSearchTypeChange() {
                 const selectedValue = searchTypeSelect.value;
 
-                propertyTypeForLeaseInput.style.display = selectedValue === 'For Rent' ? 'block' : 'none';
-                propertyTypeForSaleInput.style.display = selectedValue === 'For Sale' ? 'block' : 'none';
+                propertyTypeForLeaseInput.style.display = selectedValue === 'forRent' ? 'block' : 'none';
+                propertyTypeForSaleInput.style.display = selectedValue === 'forSale' ? 'block' : 'none';
 
-                // Populate property type options based on the selected search type
-                const propertyTypeInput = selectedValue === 'For Rent' ? propertyTypeForLeaseInput : propertyTypeForSaleInput;
-                const propertyTypeOptions = Object.keys(categoryMappings[selectedValue]);
-                populatePropertyTypeOptions(propertyTypeInput, propertyTypeOptions);
+                if (selectedValue === 'forRent') {
+                    populateOptions(propertyTypeForLeaseInput, propertyTypeForLeaseOptions);
+                } else if (selectedValue === 'forSale') {
+                    populateOptions(propertyTypeForSaleInput, propertyTypeForSaleOptions);
+                }
             }
 
-            function populatePropertyTypeOptions(inputElement, options) {
-                inputElement.innerHTML = '';  // Clear existing options
-
-                for (const option of options) {
+            function populateOptions(inputElement, options) {
+                inputElement.innerHTML = '';
+                options.forEach(option => {
                     const optionElement = document.createElement('option');
-                    optionElement.value = categoryMappings[searchTypeSelect.value][option];
+                    optionElement.value = option;
                     optionElement.textContent = option;
                     inputElement.appendChild(optionElement);
-                }
+                });
             }
 
             searchTypeSelect.addEventListener('change', handleSearchTypeChange);
@@ -66,32 +41,32 @@
     </script>
 </head>
 <body>
-  <h1>Search</h1>
+    <h1>Search</h1>
 
-  <form id="search-form" method="POST" action="{% url 'scrapper:search_Showcase' %}">
-    {% csrf_token %}
+    <form id="search-form" method="POST" action="{% url 'scrapper:search_Showcase' %}">
+        {% csrf_token %}
 
-    <label for="search-type">Search Type:</label>
-    <select id="search-type" name="search-type">
-        <option value="For Rent">Rent</option>
-        <option value="For Sale">Sale</option>
-    </select>
+        <label for="search-type">Search Type:</label>
+        <select id="search-type" name="search-type">
+            <option value="forRent">Rent</option>
+            <option value="forSale">Sale</option>
+        </select>
 
-    <label for="propertytypeforrent" id="propertytypeforrent-label" style="display: none;">Property Name:</label>
-    <select id="propertytypeforrent" name="propertytypeforrent" style="display: none;"></select>
+        <label for="propertytypeforrent" id="propertytypeforrent-label" style="display: none;">Property Name:</label>
+        <select id="propertytypeforrent" name="propertytypeforrent" style="display: none;"></select>
 
-    <label for="propertytypeforsale" id="propertytypeforsale-label" style="display: none;">Property Name:</label>
-    <select id="propertytypeforsale" name="propertytypeforsale" style="display: none;"></select>
+        <label for="propertytypeforsale" id="propertytypeforsale-label" style="display: none;">Property Name:</label>
+        <select id="propertytypeforsale" name="propertytypeforsale" style="display: none;"></select>
 
-    <br><br>
 
-    <label for="geography">Location:</label>
-    <input type="text" id="geography" name="geography">
+        <br><br>
 
-    <br><br>
+        <label for="geography">Location:</label>
+        <input type="text" id="geography" name="geography">
 
-    <input type="submit" value="Search">
-  </form>
+        <br><br>
 
+        <input type="submit" value="Search">
+    </form>
 </body>
 </html>
