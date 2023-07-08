@@ -6,6 +6,8 @@ from django.shortcuts import render
 from .ShowCase.main import scrape_showcase
 from .crexi.main import scrape_crexi
 from .loopnet.main import *
+from .propertysharks.main import scrape_propertysharks
+
 global scraped_data
 
 
@@ -124,4 +126,26 @@ def crexi(request):
         })
 
     return render(request, 'crexi/search.html')
+
+def propertysharks(request):
+    if request.method == 'POST':
+        search_type = request.POST.get('search-type')
+        property_name = None
+        if search_type == 'forLease':
+            property_name = request.POST.get('propertytypeforlease')
+
+        location = request.POST.get('geography')
+
+        scraped_data = scrape_propertysharks(search_type, property_name, location)
+        request.session['scrapdata'] = scraped_data
+
+        return render(request, 'propertysharks/search_results.html', {
+            'search_type': search_type,
+            'property_name': property_name,
+            'location': location,
+            'scraped_data': [scraped_data],
+        })
+
+    return render(request, 'propertysharks/search.html')
+
 

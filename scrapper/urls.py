@@ -12,8 +12,5 @@ urlpatterns = [
     path('search_results/download-csv/', views.Csv, name='download_csv'),
     path('search_Showcase/', views.showcase, name='search_Showcase'),
     path('search_crexi/', views.crexi, name='search_Crexi'),
-
-
-
-
+    path('search_propertysharks/', views.propertysharks, name='search_propertysharks'),
 ]

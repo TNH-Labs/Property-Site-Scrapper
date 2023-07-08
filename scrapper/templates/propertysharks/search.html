@@ -1,0 +1,61 @@
+<!-- search.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search</title>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const searchTypeSelect = document.getElementById('search-type');
+            const propertyTypeForLeaseInput = document.getElementById('propertytypeforlease');
+            const propertyTypeForLeaseOptions = ["Office", "Industrial", "Retail", "Multi-Family", "Land", "Special Purpose", "Events", "Agriculture", "Health Care", "Sports and Entertainment", "Senior Housing", "Flex Space", "Mixed Use", "Hotel and Motel"];
+            function handleSearchTypeChange() {
+                const selectedValue = searchTypeSelect.value;
+
+                propertyTypeForLeaseInput.style.display = selectedValue === 'forLease' ? 'block' : 'none';
+
+                if (selectedValue === 'forLease') {
+                    populateOptions(propertyTypeForLeaseInput, propertyTypeForLeaseOptions);
+                }
+            }
+
+            function populateOptions(inputElement, options) {
+                inputElement.innerHTML = '';
+                options.forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.textContent = option;
+                    inputElement.appendChild(optionElement);
+                });
+            }
+
+            searchTypeSelect.addEventListener('change', handleSearchTypeChange);
+            handleSearchTypeChange();
+        });
+    </script>
+</head>
+<body>
+    <h1>Search</h1>
+
+    <form id="search-form" method="POST" action="{% url 'scrapper:search_propertysharks' %}">
+        {% csrf_token %}
+
+        <label for="search-type">Search Type:</label>
+        <select id="search-type" name="search-type">
+            <option value="forLease">Lease and Sale</option>
+        </select>
+
+        <label for="propertytypeforlease" id="propertytypeforlease-label" style="display: none;">Property Name:</label>
+        <select id="propertytypeforlease" name="propertytypeforlease" style="display: none;"></select>
+
+
+        <br><br>
+
+        <label for="geography">Location:</label>
+        <input type="text" id="geography" name="geography">
+
+        <br><br>
+
+        <input type="submit" value="Search">
+    </form>
+</body>
+</html>

@@ -69,10 +69,6 @@ def scrape_showcase(search_type, category, location):
 
         print(f"Scraping {url}...")
 
-
-        print(f"Scraping {url}...")
-
-
         print("Before response...")
         # Make the request with the selected proxy and parameters
         client = ZenRowsClient("e810791d06d06c2bba5a8ee7696f03d65385c0cd")
