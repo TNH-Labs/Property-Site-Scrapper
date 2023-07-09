@@ -1,3 +1,5 @@
+import ast
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
@@ -5,7 +7,19 @@ from bs4 import BeautifulSoup
 import json
 import random
 import re
+
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
 from zenrows import ZenRowsClient
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+import pyautogui as pg
 
 from ..CSV import save_dict_to_csv
 
@@ -95,6 +109,9 @@ def scrape_propertysharks(search_type, category, location):
 
         response = client.get(url, params=params)
 
+        # print(f"response: {response}\n\n")
+        # print(f"response.text: {response.text}\n\n")
+
         # print(response.text)
         print("After response...")
         response.raise_for_status()
@@ -104,7 +121,7 @@ def scrape_propertysharks(search_type, category, location):
         modified_data = remove_at_symbols(json_data)
 
 
-        print(f"modified_data: {modified_data}\n\n")
+        # print(f"modified_data: {modified_data}\n\n")
 
         # print(f"modified_data: {modified_data}\n\n")
 
@@ -118,182 +135,87 @@ def scrape_propertysharks(search_type, category, location):
         # print(f"search_type: {search_type}\n\n")
 
 
+        option = Options()
+        # option.add_argument("--window-size=1920,1080")
+        option.add_argument("--start-maximized")
+        # option.add_argument("--headless")
+        # option.add_argument('--disable-blink-features=AutomationControlled')
+        option.add_argument("--disable-infobars")
+        option.add_argument("start-maximized")
+        option.add_argument("--disable-extensions")
+        option.add_argument("--disable-notifications")
+        option.add_experimental_option('excludeSwitches', ['enable-logging'])
 
-        if search_type == 'forLease' or search_type == 'forSale':
-            if item:
-                print(f"item: {item}\n\n")
-                for key, value in item.items():
-                    # print(f"Key: {key}\n\n")
-                    # print(f"Value: {value}\n\n")
-                    if key == 'about':
-                        print(f"Value: {value}\n\n")
-                        try:
-                            for i in value:
-                                print(f"i: {i}\n\n")
-                                for key, value in i['item'].items():
-                                    if 'availableAtOrFrom' in i['item']:
-                                        if 'address' in i['item']['availableAtOrFrom']:
-                                            if 'streetAddress' in i['item']['availableAtOrFrom']['address']:
-                                                address = i['item']['availableAtOrFrom']['address']['streetAddress']
-                                                locality = i['item']['availableAtOrFrom']['address']['addressLocality']
-                                                region = i['item']['availableAtOrFrom']['address']['addressRegion']
-                                                # print(f"i val: {address}\n\n")
-                                                listing = {
-                                                    'name': i['item']['name'],
-                                                    'description': i['item']['description'],
-                                                    'url': i['item']['url'],
-                                                    'image': i['item']['image'],
-                                                    'address': address,
-                                                    'locality': locality,
-                                                    'region': region
-                                                }
-                                                if listing not in listings:
-                                                    listings.append(listing)
-                        except:
-                            address = value['availableAtOrFrom']['address']['streetAddress']
-                            locality = value['availableAtOrFrom']['address']['addressLocality']
-                            region = value['availableAtOrFrom']['address']['addressRegion']
-                            # print(f"i val: {address}\n\n")
-                            listing = {
-                                'name': value['name'],
-                                'description': value['description'],
-                                'url': value['url'],
-                                'image': value['image'],
-                                'address': address,
-                                'locality': locality,
-                                'region': region
-                            }
-                            if listing not in listings:
-                                listings.append(listing)
+        driver = webdriver.Chrome("./chromedriver.exe", options=option)
+
+        # driver = webdriver.Chrome(options=option, service=service_)
+        # driver.set_window_rect(width=1500, height=1000)
+        xpath = "//div//ul[@class='listings']"
+        try:
+            # print("url: ",url)
+            driver.get(url)
+            # listing_element = driver.find_element(By.XPATH, all )
+            wait = WebDriverWait(driver, 15)
+            listing_element = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
+            # print(f"Found {listing_element} listing element")
 
 
-        elif search_type == 'auction':
-            if modified_data:
-                for item in modified_data:
-                    for key, value in item.items():
-                        # print(f"Key: {key}\n\n")
-                        if key == 'about':
-                            # print(f"Value: {value}\n\n")
-                            for i in value:
-                                # print(f"i: {i}\n\n")
-                                for key, value in i['item'].items():
-                                    listing = {
-                                    'type': i['item']['type'],
-                                    'name': i['item']['name'],
-                                    'description': i['item']['description'],
-                                    'url': i['item']['url'],
-                                    'image': i['item']['image'],
-                                    'category': i['item']['category'],
-                                    'address': i['item']['availableAtOrFrom']['address']['streetAddress'],
-                                    'locality': i['item']['availableAtOrFrom']['address']['addressLocality'],
-                                    'region': i['item']['availableAtOrFrom']['address']['addressRegion'],
-                                    'offered_by': i['item']['offeredBy'][0]['name'],
-                                    'offered_by_job_title': i['item']['offeredBy'][0]['jobTitle'],
-                                    'works_for': i['item']['offeredBy'][0]['worksFor']['name']
-                                    }
-                                    if listing not in listings:
-                                        listings.append(listing)
-        elif search_type == 'BBSType':
-            listings = BBS(modified_data[3])
+            # Find all elements matching the XPath expression
+            """
+            correct the xpath go more in depth below
+            """
+            project_links = listing_element.find_elements(By.XPATH, xpath)
+            src = "//div[@class='photo']//img[@class='property']"
 
-        if listings == [] and search_type == 'forLease' or search_type == 'forSale':
-            for key, value in modified_data[2].items():
-                # print(f"Key: {key}\n\n")
-                # print(f"Value: {value}\n\n")
-                if key == 'about':
-                    print(f"Value: {value}\n\n")
-                    try:
-                        for i in value:
-                            print(f"i: {i}\n\n")
-                            for key, value in i['item'].items():
-                                if 'availableAtOrFrom' in i['item']:
-                                    if 'address' in i['item']['availableAtOrFrom']:
-                                        if 'streetAddress' in i['item']['availableAtOrFrom']['address']:
-                                            address = i['item']['availableAtOrFrom']['address']['streetAddress']
-                                            locality = i['item']['availableAtOrFrom']['address']['addressLocality']
-                                            region = i['item']['availableAtOrFrom']['address']['addressRegion']
-                                            # print(f"i val: {address}\n\n")
-                                            listing = {
-                                                'name': i['item']['name'],
-                                                'description': i['item']['description'],
-                                                'url': i['item']['url'],
-                                                'image': i['item']['image'],
-                                                'address': address,
-                                                'locality': locality,
-                                                'region': region
-                                            }
-                                            if listing not in listings:
-                                                listings.append(listing)
-                    except:
-                        address = value['availableAtOrFrom']['address']['streetAddress']
-                        locality = value['availableAtOrFrom']['address']['addressLocality']
-                        region = value['availableAtOrFrom']['address']['addressRegion']
-                        # print(f"i val: {address}\n\n")
-                        listing = {
-                            'name': value['name'],
-                            'description': value['description'],
-                            'url': value['url'],
-                            'image': value['image'],
-                            'address': address,
-                            'locality': locality,
-                            'region': region
-                        }
-                        if listing not in listings:
-                            listings.append(listing)
+            links = listing_element.find_elements(By.XPATH, src)
+            for i in links:
+                z = i.get_attribute("src")
+                print(f"src: {z}\n\n")
+
+            href = "//div[@class='action-bar']//a[@class='btn btn-ghost-primary']"
+
+            links = listing_element.find_elements(By.XPATH, href)
+            for i in links:
+                z = i.get_attribute("href")
+                print(f"href: {z}\n\n")
+            listing_element.find_elements(By.XPATH, xpath)
+            print(f"Found {len(project_links)} project links")
+            print(f"Found {project_links} project links")
 
 
+            for i in project_links:
+                listings.append(i.text)
 
-        return listings
-
-def BBS(response):
-    url = "https://www.loopnet.com"
-    listings = []
-    csv_listings = []
-    bbs = response
-    print(f"bbs: {bbs}\n\n")
-    print(f"url: {url}\n\n")
-    # print(f"bbs: {bbs}\n\n")
-    print("-------------------------------------------end bbs-------------------------------------------")
-    for key, value in bbs.items():
-            # print(f"key: {key}\n\n")
-            # print(f"value: {value}\n\n")
-            if key == 'csr':
-                for i in value:
-
-                    # for kii, vii in i.items():
-                    # print(f"vii: {vii}\n\n")
-                    # print(f"kii: {kii}\n\n")
-                    try:
-                        listing = {
-                            'url':url + i['urlStub'],
-                            'listNumber': i['listNumber'],
-                            'header': i['header'],
-                            'description': i['description'],
-                            'price': i['price'],
-                            'image': url + i['img'][0],
-                            'location': i['location'],
-                            'cashFlow': i['cashFlow'],
-                            'Contact_name': i['contactInfo']['contactFullName'],
-                            'Contact_phone': i['contactInfo']['contactPhoneNumber']['telephone']
-                        }
-                    except:
-                        listing = {
-                            'url': url + i['urlStub'],
-                            'listNumber': i['listNumber'],
-                            'header': i['header'],
-                            'description': i['description'],
-                            'price': i['price'],
-                            'image': url + i['img'][0],
-                            'location': i['location'],
-
-                        }
-
-                    if listing not in listings:
-                        listings.append(listing)
+            # print(f"listings: {listings}\n\n")
+            result = parse_list(listings)
+            # print(f"result: {result}\n\n")
+            # for i in result:
+            #     print(f"i: {i}\n\n")
 
 
-    # print(f"\n\nListings:", listings)
-    return listings
+            driver.quit()
+
+        except Exception as e:
+            print(e)
+            driver.quit()
+            return None
+
+        return result
+
+
+def parse_list(list_data):
+    parsed_data = []
+    for item in list_data:
+        item_data = item.strip("'").split("\n")
+        if len(item_data) >= 7:
+            parsed_item = {
+                "Title": item_data[0],
+                "address": item_data[1],
+                "type": item_data[2],
+                "Space": item_data[6]
+            }
+            parsed_data.append(parsed_item)
+    return parsed_data
 
 def remove_at_symbols(obj):
     if isinstance(obj, dict):
