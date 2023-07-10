@@ -16,8 +16,8 @@
                     <h2>{{ list.Title }}</h2>
                     <p>Location: {{ list.address }}</p>
                         <p>City: {{ list.type }}</p>
-                    <p>URL: <a href="{{ list.url }}">{{ list.url }}</a></p>
-                    <img src="{{ list.image }}" alt="Listing Image">
+                    <p>URL: <a href="{{ list.href }}">{{ list.href }}</a></p>
+                    <img src="{{ list.src }}" alt="Listing Image">
                     {% if list.price %}
                         <p>Price: {{ listing.price }}</p>
                     {% endif %}

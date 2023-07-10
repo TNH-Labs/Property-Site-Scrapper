@@ -151,54 +151,91 @@ def scrape_propertysharks(search_type, category, location):
         # driver = webdriver.Chrome(options=option, service=service_)
         # driver.set_window_rect(width=1500, height=1000)
         xpath = "//div//ul[@class='listings']"
-        try:
-            # print("url: ",url)
-            driver.get(url)
-            # listing_element = driver.find_element(By.XPATH, all )
-            wait = WebDriverWait(driver, 15)
-            listing_element = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
-            # print(f"Found {listing_element} listing element")
+        # try:
+        # print("url: ",url)
+        driver.get(url)
+        # listing_element = driver.find_element(By.XPATH, all )
+        wait = WebDriverWait(driver, 15)
+        listing_element = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
+        # print(f"Found {listing_element} listing element")
 
 
-            # Find all elements matching the XPath expression
-            """
-            correct the xpath go more in depth below
-            """
-            project_links = listing_element.find_elements(By.XPATH, xpath)
-            src = "//div[@class='photo']//img[@class='property']"
+        def scroll_to_element(driver, element):
+            # driver.execute_script("arguments[0].scrollIntoView(true);", element)
+            # driver.execute_script("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element)
+            viewport_height = driver.execute_script("return window.innerHeight")
 
-            links = listing_element.find_elements(By.XPATH, src)
-            for i in links:
-                z = i.get_attribute("src")
-                print(f"src: {z}\n\n")
+            # Get the height of the element
+            element_height = element.size["height"]
 
-            href = "//div[@class='action-bar']//a[@class='btn btn-ghost-primary']"
+            print(f"vewport_height: {viewport_height}\n\n")
+            print(f"element_height: {element_height}\n\n")
 
-            links = listing_element.find_elements(By.XPATH, href)
-            for i in links:
-                z = i.get_attribute("href")
-                print(f"href: {z}\n\n")
-            listing_element.find_elements(By.XPATH, xpath)
-            print(f"Found {len(project_links)} project links")
-            print(f"Found {project_links} project links")
+            # Calculate the number of times to scroll to fully reveal the element
+            num_scrolls = element_height // viewport_height + 1
+
+            # Execute JavaScript to scroll the element into view incrementally
+            for _ in range(num_scrolls * 3):
+                time.sleep(0.2)
+                driver.execute_script("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element)
+
+        scroll = driver.find_element(By.XPATH, "//div[@class='inner']")
+        project_links = listing_element.find_elements(By.XPATH, "//div//ul[@class='listings']//li[@class='property-details property-details-basic']")
+        scroll_to_element(driver, scroll)
+
+        time.sleep(5)
+        # Find all elements matching the XPath expression
+        """
+        correct the xpath go more in depth below
+        """
+        src = "//div[@class='photo']//img[@class='property']"
+        srcs = []
+        hrefs = []
+        link = listing_element.find_elements(By.XPATH, src)
+
+        for i in link:
+            z = i.get_attribute("src")
+            srcs.append(z)
+            print(f"src: {z}\n\n")
+
+        href = "//div[@class='action-bar']//a[@class='btn btn-ghost-primary']"
+
+        links = listing_element.find_elements(By.XPATH, href)
+        for i in links:
+            z = i.get_attribute("href")
+            hrefs.append(z)
+            print(f"href: {z}\n\n")
+        listing_element.find_elements(By.XPATH, xpath)
+        print(f"Found {len(project_links)} project links")
+        print(f"Found {project_links} project links")
 
 
-            for i in project_links:
-                listings.append(i.text)
+        for i in project_links:
+            listings.append(i.text)
+            print(f"i: {i.text}")
 
-            # print(f"listings: {listings}\n\n")
-            result = parse_list(listings)
-            # print(f"result: {result}\n\n")
-            # for i in result:
-            #     print(f"i: {i}\n\n")
+        # print(f"listings: {listings}\n\n")
+        result = parse_list(listings)
+        # for i in result:
+        #     i["url"] = links[result.index(i)].get_attribute("href")
+        #     i["image"] = link[result.index(i)].get_attribute("src")
+        print(f"result: {len(result)}\n\n")
+        print(f"hrefs : {len(hrefs)}\n\n")
+        print(f"srcs : {len(srcs)}\n\n")
+        # for i in result:
+        #     print(f"i: {i}\n\n")
+
+        result = update_result(result, hrefs, srcs)
+
+        print(f"result: {result}\n\n")
 
 
-            driver.quit()
+        driver.quit()
 
-        except Exception as e:
-            print(e)
-            driver.quit()
-            return None
+        # except Exception as e:
+        #     print(e)
+        #     driver.quit()
+        #     return None
 
         return result
 
@@ -272,3 +309,9 @@ def replace_spaces_and_commas(string):
     print(f"new stirng = {new_string}")
 
     return new_string
+
+
+def update_result(result, hrefs, srcs):
+  for i in range(len(srcs)):
+    result[i].update(href=hrefs[i], src=srcs[i])
+  return result
