@@ -26,7 +26,8 @@ def Csv(request):
         updated_data.append(updated_dict)
     keys = updated_data[0].keys()
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="mydata.csv"'
+    name = request.session['name']
+    response['Content-Disposition'] = f'attachment; filename="{name}.csv"'
     writer = csv.writer(response)
     writer.writerow(keys)  # add header row
     for row in updated_data:
@@ -54,6 +55,7 @@ def loopnet(request):
         print(f"Scraped data: {scraped_data}...")
 
         request.session['scrapdata'] = scraped_data
+        request.session['name'] = location
 
         if search_type == 'BBSType':
             return render(request, 'Loopnet/BBS.html', {
@@ -90,6 +92,8 @@ def showcase(request):
 
         scraped_data = scrape_showcase(search_type, property_name, location)
         request.session['scrapdata'] = scraped_data
+        request.session['name'] = location
+
         return render(request, 'ShowCase/search_results.html', {
             'search_type': search_type,
             'property_name': property_name,
@@ -116,6 +120,7 @@ def crexi(request):
 
         scraped_data = scrape_crexi(location, property_name, search_type)
         request.session['scrapdata'] = scraped_data
+        request.session['name'] = location
 
 
         return render(request, 'crexi/search_results.html', {
@@ -138,6 +143,7 @@ def propertysharks(request):
 
         scraped_data = scrape_propertysharks(search_type, property_name, location)
         request.session['scrapdata'] = scraped_data
+        request.session['name'] = location
 
         return render(request, 'propertysharks/search_results.html', {
             'search_type': search_type,

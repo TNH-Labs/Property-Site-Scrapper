@@ -96,18 +96,32 @@ def scrape_showcase(search_type, category, location):
         if search_type == 'For Rent':
             for key, values in sale_data[0].items():
                 if key == 'about':
+                    print(f"values: {values}...")
                     for i in values:
                         # print(f"i: {i}...")
-                        listing = {
-                            "name": i["item"]["name"],
-                            "description": i["item"]["description"],
-                            "url": url + i["item"]["url"],
-                            "image": i["item"]["image"],
-                            "price": i["item"]["price"] + " " + i["item"]["priceCurrency"],
-                            "address": i["item"]["availableAtOrFrom"]["address"]["streetAddress"],
-                            "locality": i["item"]["availableAtOrFrom"]["address"]["addressLocality"],
-                            "region": i["item"]["availableAtOrFrom"]["address"]["addressRegion"],
-                        }
+                        try:
+                            listing = {
+                                "name": i["item"]["name"],
+                                "description": i["item"]["description"],
+                                "url": url + i["item"]["url"],
+                                "image": i["item"]["image"],
+                                "price": i["item"]["price"] + " " + i["item"]["priceCurrency"],
+                                "address": i["item"]["availableAtOrFrom"]["address"]["streetAddress"],
+                                "locality": i["item"]["availableAtOrFrom"]["address"]["addressLocality"],
+                                "region": i["item"]["availableAtOrFrom"]["address"]["addressRegion"],
+                            }
+                        except:
+                            listing = {
+                                "name": i["name"],
+                                "description": i["description"],
+                                "url": url + i["url"],
+                                "image": i["image"],
+                                "price": i["price"] + " " + i["priceCurrency"],
+                                "address": i["availableAtOrFrom"]["address"]["streetAddress"],
+                                "locality": i["availableAtOrFrom"]["address"]["addressLocality"],
+                                "region": i["availableAtOrFrom"]["address"]["addressRegion"],
+                            }
+
                         if listing not in listings:
                             listings.append(listing)
         else:
@@ -139,11 +153,23 @@ def scrape_showcase(search_type, category, location):
 def replace_spaces_and_commas(string):
     # Split the string into words
     words = string.split()
+    print(f"words: {words}...")
 
     # If there are exactly two words
     if len(words) == 2:
+        # if there is a comma in the string then remove it
+        for i in range(len(words)):
+            if "," in words[i]:
+                words[i] = words[i].replace(",", "")
+
         # Reverse the order and join with a slash
         new_string = "/".join(words[::-1])
+    elif len(words) > 2:
+        # If there are more than two words, last one should go to first with '/' like 'word/' and rest having spaces should replaced with '-' so final string can be 'word/word-word'
+        new_string = words[-1] + "/"
+        for i in range(len(words) - 1):
+            new_string += words[i] + "-"
+        new_string = new_string[:-1]
     else:
         # If there are more than two words, replace the comma with a dash
         new_string = string.replace(",", "-")

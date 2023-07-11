@@ -331,5 +331,5 @@ def replace_spaces_and_commas(string):
     # Replace spaces with dashes
     string = string.replace(" ", "-")
     # Replace commas with dashes
-    string = string.replace(",", "-")
+    string = string.replace(",", "")
     return string
