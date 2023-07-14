@@ -6,15 +6,22 @@
     <script>
         window.addEventListener('DOMContentLoaded', (event) => {
             const searchTypeSelect = document.getElementById('search-type');
-            const propertyTypeForLeaseInput = document.getElementById('propertytypeforlease');
-            const propertyTypeForLeaseOptions = ["Office", "Industrial", "Retail", "Multi-Family", "Land", "Special Purpose", "Events", "Agriculture", "Health Care", "Sports and Entertainment", "Senior Housing", "Flex Space", "Mixed Use", "Hotel and Motel"];
+            const propertyTypeForLeaseInput = document.getElementById('propertytypeforrent');
+            const propertyTypeForSaleInput = document.getElementById('propertytypeforsale');
+            const propertyTypeForLeaseOptions = ["Office", "Industrial", "Retail", "Multi-Family", "Land", "Special Purpose", "Events", "Agriculture", "Health Care", "Sports and Entertainment", "Senior Housing", "Flex Space", "Mixed Use", "Hotel and Motel"]
+            const propertyTypeForSaleOptions = ["Office", "Industrial", "Retail", "Multi-Family", "Land", "Special Purpose", "Events", "Agriculture", "Health Care", "Sports and Entertainment", "Senior Housing", "Flex Space", "Mixed Use", "Hotel and Motel"];
+
+
             function handleSearchTypeChange() {
                 const selectedValue = searchTypeSelect.value;
 
-                propertyTypeForLeaseInput.style.display = selectedValue === 'forLease' ? 'block' : 'none';
+                propertyTypeForLeaseInput.style.display = selectedValue === 'forRent' ? 'block' : 'none';
+                propertyTypeForSaleInput.style.display = selectedValue === 'forSale' ? 'block' : 'none';
 
-                if (selectedValue === 'forLease') {
+                if (selectedValue === 'forRent') {
                     populateOptions(propertyTypeForLeaseInput, propertyTypeForLeaseOptions);
+                } else if (selectedValue === 'forSale') {
+                    populateOptions(propertyTypeForSaleInput, propertyTypeForSaleOptions);
                 }
             }
 
@@ -41,11 +48,15 @@
 
         <label for="search-type">Search Type:</label>
         <select id="search-type" name="search-type">
-            <option value="forLease">Lease and Sale</option>
+            <option value="forRent">Lease</option>
+            <option value="forSale">Sale</option>
         </select>
 
-        <label for="propertytypeforlease" id="propertytypeforlease-label" style="display: none;">Property Name:</label>
-        <select id="propertytypeforlease" name="propertytypeforlease" style="display: none;"></select>
+        <label for="propertytypeforrent" id="propertytypeforrent-label" style="display: none;">Property Name:</label>
+        <select id="propertytypeforrent" name="propertytypeforrent" style="display: none;"></select>
+
+        <label for="propertytypeforsale" id="propertytypeforsale-label" style="display: none;">Property Name:</label>
+        <select id="propertytypeforsale" name="propertytypeforsale" style="display: none;"></select>
 
 
         <br><br>

@@ -6,7 +6,7 @@ from ..loopnet.main import remove_at_symbols
 
 
 def scrape_showcase(search_type, category, location):
-    # try:
+    try:
         # Perform scraping based on the selected search type and form data
         print("\n\nScraping LoopNet...")
         print(f"Search type: {search_type}")
@@ -149,6 +149,10 @@ def scrape_showcase(search_type, category, location):
 
         return listings
 
+    except Exception as e:
+        print(f"Error: {e}...")
+        return None
+
 
 def replace_spaces_and_commas(string):
     # Split the string into words
@@ -168,6 +172,8 @@ def replace_spaces_and_commas(string):
         # If there are more than two words, last one should go to first with '/' like 'word/' and rest having spaces should replaced with '-' so final string can be 'word/word-word'
         new_string = words[-1] + "/"
         for i in range(len(words) - 1):
+            if "," in words[i]:
+                words[i] = words[i].replace(",", "")
             new_string += words[i] + "-"
         new_string = new_string[:-1]
     else:

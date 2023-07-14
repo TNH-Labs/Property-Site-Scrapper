@@ -1,0 +1,81 @@
+<!-- search.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search</title>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const searchTypeSelect = document.getElementById('search-type');
+            const propertyTypeForLeaseInput = document.getElementById('propertytypeforlease');
+            const propertyTypeForSaleInput = document.getElementById('propertytypeforsale');
+            const propertyTypeBBSInput = document.getElementById('propertytypeBBS');
+            const propertyTypeForLeaseOptions = ['Land', 'Flex', 'Industrial and Warehouse Space', 'Retail Space', 'Special Purpose', 'Restaurants', 'Hotel and Motel', 'Events', 'Office', 'Agriculture', 'Multi-Family', 'Health Care', 'Restaurant', 'Mixed Use', 'Office Space', 'Medical', 'Medical Offices', 'Industrial', 'Flex Space', 'Coworking', 'Retail', 'Sports and Entertainment', 'Coworking Space', 'Senior Housing', 'All Spaces'];
+            const propertyTypeForSaleOptions = ['Retail', 'Mobile Home Park', 'Retail Space', 'Shopping Center', 'Note/Loan', 'Restaurant', 'Flex Space', 'Multifamily', 'Health Care', 'Industrial', 'Events', 'Self Storage', 'Office', 'Restaurants', 'Hotel and Motel', 'Shopping Centers & Malls', 'Residential Income', 'Hotels & Motels', 'Industrial Space', 'Land', 'Sports & Entertainment', 'Health Care Properties', 'Senior Housing', 'Mixed Use', 'All Property Types', 'Agriculture', 'Office Space', 'Sports and Entertainment', 'Multifamily Apartments', 'Investment Properties', 'Hospitality', 'Special Purpose', 'Residential Income Properties', 'Sports & Entertainment Properties', 'Specialty', 'Multi-Family', 'Senior Living'];
+            const propertyTypeBBSCategories = ['Automotive & Boat', 'Office', 'Special Purpose', 'Industrial', 'Retail', 'Wholesale & Distributors', 'Transportation & Storage', 'All Industries', 'Note/Loan', 'Self Storage', 'Mobile Home Park', 'Popular Industries', 'Online & Technology', 'Restaurants & Food', 'Franchise Opportunities', 'Senior Living', 'Hospitality', 'Land', 'Multifamily', 'Mixed Use', 'Service Businesses'];
+
+
+            function handleSearchTypeChange() {
+                const selectedValue = searchTypeSelect.value;
+
+                propertyTypeForLeaseInput.style.display = selectedValue === 'forLease' ? 'block' : 'none';
+                propertyTypeForSaleInput.style.display = selectedValue === 'forSale' ? 'block' : 'none';
+                propertyTypeBBSInput.style.display = selectedValue === 'BBSType' ? 'block' : 'none';
+
+                if (selectedValue === 'forLease') {
+                    populateOptions(propertyTypeForLeaseInput, propertyTypeForLeaseOptions);
+                } else if (selectedValue === 'forSale') {
+                    populateOptions(propertyTypeForSaleInput, propertyTypeForSaleOptions);
+                } else if (selectedValue === 'BBSType') {
+                    populateOptions(propertyTypeBBSInput, propertyTypeBBSCategories);
+                }
+            }
+
+            function populateOptions(inputElement, options) {
+                inputElement.innerHTML = '';
+                options.forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.textContent = option;
+                    inputElement.appendChild(optionElement);
+                });
+            }
+
+            searchTypeSelect.addEventListener('change', handleSearchTypeChange);
+            handleSearchTypeChange();
+        });
+    </script>
+</head>
+<body>
+    <h1>Search</h1>
+
+    <form id="search-form" method="POST" action="{% url 'scrapper:search' %}">
+        {% csrf_token %}
+
+        <label for="search-type">Search Type:</label>
+        <select id="search-type" name="search-type">
+            <option value="forLease">Lease</option>
+            <option value="forSale">Sale</option>
+            <option value="auction">Auctions</option>
+            <option value="BBSType">Business</option>
+        </select>
+
+        <label for="propertytypeforlease" id="propertytypeforlease-label" style="display: none;">Property Name:</label>
+        <select id="propertytypeforlease" name="propertytypeforlease" style="display: none;"></select>
+
+        <label for="propertytypeforsale" id="propertytypeforsale-label" style="display: none;">Property Name:</label>
+        <select id="propertytypeforsale" name="propertytypeforsale" style="display: none;"></select>
+
+        <label for="propertytypeBBS" id="propertytypeBBS-label" style="display: none;">Category:</label>
+        <select id="propertytypeBBS" name="propertytypeBBS" style="display: none;"></select>
+
+        <br><br>
+
+        <label for="geography">Location:</label>
+        <input type="text" id="geography" name="geography">
+
+        <br><br>
+
+        <input type="submit" value="Search">
+    </form>
+</body>
+</html>

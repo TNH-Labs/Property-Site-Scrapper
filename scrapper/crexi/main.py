@@ -218,6 +218,18 @@ def scrape_crexi(location, category, search_type):
 
         soup = BeautifulSoup(html_response, 'html.parser')
 
+        # alternate:
+        """
+            re = "//crx-search-results"
+            wait = WebDriverWait(driver, 15)
+            listing_element = wait.until(EC.presence_of_element_located((By.XPATH, re)))
+            ree = "//crx-property-tile-aggregate[@class='ng-star-inserted']"
+            link = listing_element.find_elements(By.XPATH, ree)
+            for i in link:
+                print(f"i: {i.text}")
+                print(f"i: {i.get_attribute('href')}")
+        """
+
         # Find the container element that holds the listings
         listings_container = soup.find('crx-search-results')
         # print(f"Found {listings_container} listings container")

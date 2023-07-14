@@ -136,10 +136,16 @@ def propertysharks(request):
     if request.method == 'POST':
         search_type = request.POST.get('search-type')
         property_name = None
-        if search_type == 'forLease':
-            property_name = request.POST.get('propertytypeforlease')
+        if search_type == 'forRent':
+            property_name = request.POST.get('propertytypeforrent')
+        elif search_type == 'forSale':
+            property_name = request.POST.get('propertytypeforsale')
 
         location = request.POST.get('geography')
+
+        print(location, "location")
+        print(property_name, "property_name")
+        print(search_type, "search_type")
 
         scraped_data = scrape_propertysharks(search_type, property_name, location)
         request.session['scrapdata'] = scraped_data
@@ -153,5 +159,52 @@ def propertysharks(request):
         })
 
     return render(request, 'propertysharks/search.html')
+
+
+def search(request):
+    if request.method == 'POST':
+        # Access and process the form data here
+        search_type = request.POST.get('search-type')
+        property_name = None
+        if search_type == 'forLease':
+            property_name = request.POST.get('propertytypeforlease')
+        elif search_type == 'forSale':
+            property_name = request.POST.get('propertytypeforsale')
+        elif search_type == 'auction':
+            property_name = 'auction'  # Adjust the field name for auctions
+        elif search_type == 'BBSType':
+            property_name = request.POST.get('propertytypeBBS')
+        location = request.POST.get('geography')
+
+        # Perform scraping using the form data
+        scraped_data = scrape_loopnet(search_type, property_name, location)
+        if search_type == 'forLease' or search_type == 'forSale':
+            scraped_data += scrape_showcase(search_type, property_name, location)
+            scraped_data += scrape_propertysharks(search_type, property_name, location)
+        elif search_type == 'auction' or search_type == 'forSale' or search_type == 'forLease':
+            scraped_data += scrape_crexi(location, property_name, search_type)
+        print(f"Scraped data: {scraped_data}...")
+
+        request.session['scrapdata'] = scraped_data
+        request.session['name'] = location
+
+        if search_type == 'BBSType':
+            return render(request, 'BBS.html', {
+                'listings': scraped_data
+            })
+        elif search_type == 'aunctions':
+            return render(request, 'auctions.html', {
+                'listings': scraped_data
+            })
+        else:
+            return render(request, 'search_results.html', {
+                'search_type': search_type,
+                'property_name': property_name,
+                'location': location,
+                'scraped_data': [scraped_data],
+            })
+
+    # Render the search form template for GET requests
+    return render(request, 'search.html')
 
 

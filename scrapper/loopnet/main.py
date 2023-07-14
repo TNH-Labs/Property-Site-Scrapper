@@ -13,7 +13,7 @@ from ..CSV import save_dict_to_csv
 
 
 def scrape_loopnet(search_type, category, location):
-    # try:
+    try:
         # Perform scraping based on the selected search type and form data
         print("\n\nScraping LoopNet...")
         print(f"Search type: {search_type}")
@@ -240,6 +240,8 @@ def scrape_loopnet(search_type, category, location):
 
 
         return listings
+    except:
+        pass
 
 def BBS(response):
     url = "https://www.loopnet.com"

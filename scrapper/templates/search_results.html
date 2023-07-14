@@ -1,0 +1,48 @@
+<!-- search_results.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Results</title>
+</head>
+<body>
+    <h1>Search Results</h1>
+
+    {% if scraped_data %}
+    <a href="{% url 'scrapper:download_csv' %}" class="btn btn-primary">Download CSV</a>
+        <ul>
+            {% for listing in scraped_data %}
+                {% for list in listing %}
+
+                    <li>
+                    <h2>{{ list.name }}</h2>
+                    <p>Location: {{ list.address }} - Locality: {{list.locality}}</p>
+                        <p>Region: {{list.region}}</p>
+
+                    <p>Description: {{ list.description }}</p>
+                    <p>URL: <a href="{{ list.url }}">{{ list.url }}</a></p>
+                    <img src="{{ list.image }}" alt="Listing Image">
+                    {% if list.price %}
+                        <p>Price: {{ listing.price }}</p>
+                    {% endif %}
+                    {% if list.available_at %}
+                        <p>Available at: {{ listing.available_at }}</p>
+                    {% endif %}
+                    {% if list.offered_by %}
+                        <p>Offered by: {{ listing.offered_by }}</p>
+                    {% endif %}
+                    {% for key, value in listing.items %}
+                        {% if key|slice:"0" == "@" %}
+                            <p>{{ key|slice:"1" }}: {{ value }}</p>
+                        {% endif %}
+                    {% endfor %}
+
+
+                    </li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No results found.</p>
+    {% endif %}
+</body>
+</html>
