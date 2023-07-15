@@ -7,7 +7,7 @@ from .ShowCase.main import scrape_showcase
 from .crexi.main import scrape_crexi
 from .loopnet.main import *
 from .propertysharks.main import scrape_propertysharks
-
+from concurrent.futures import ThreadPoolExecutor, as_completed
 global scraped_data
 
 
@@ -177,12 +177,36 @@ def search(request):
         location = request.POST.get('geography')
 
         # Perform scraping using the form data
-        scraped_data = scrape_loopnet(search_type, property_name, location)
         if search_type == 'forLease' or search_type == 'forSale':
-            scraped_data += scrape_showcase(search_type, property_name, location)
-            scraped_data += scrape_propertysharks(search_type, property_name, location)
+            with ThreadPoolExecutor() as executor:
+                futures = [executor.submit(scrape_loopnet, search_type, property_name, location),
+                           executor.submit(scrape_showcase, search_type, property_name, location),
+                           executor.submit(scrape_propertysharks, search_type, property_name, location),
+                           executor.submit(scrape_crexi, location, property_name, search_type)]
+
+                scraped_data = []
+                for future in as_completed(futures):
+                    result = future.result()
+                    try:
+                        scraped_data += result
+                    except:
+                        pass
         elif search_type == 'auction' or search_type == 'forSale' or search_type == 'forLease':
-            scraped_data += scrape_crexi(location, property_name, search_type)
+            with ThreadPoolExecutor() as executor:
+                futures = [executor.submit(scrape_loopnet, search_type, property_name, location),
+                           executor.submit(scrape_crexi, location, property_name, search_type)]
+
+                scraped_data = []
+                for future in as_completed(futures):
+                    result = future.result()
+                    try:
+                        scraped_data += result
+                    except:
+                        pass
+        else:
+            with ThreadPoolExecutor() as executor:
+                scraped_data = executor.submit(scrape_loopnet, search_type, property_name, location).result()
+
         print(f"Scraped data: {scraped_data}...")
 
         request.session['scrapdata'] = scraped_data
@@ -192,7 +216,7 @@ def search(request):
             return render(request, 'BBS.html', {
                 'listings': scraped_data
             })
-        elif search_type == 'aunctions':
+        elif search_type == 'auctions':
             return render(request, 'auctions.html', {
                 'listings': scraped_data
             })

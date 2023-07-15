@@ -27,17 +27,17 @@ from ..CSV import save_dict_to_csv
 
 
 def scrape_propertysharks(search_type, category, location):
-    # try:
-        option = Options()
-        # option.add_argument("--window-size=1920,1080")
-        option.add_argument("--start-maximized")
-        # option.add_argument("--headless")
-        # option.add_argument('--disable-blink-features=AutomationControlled')
-        option.add_argument("--disable-infobars")
-        option.add_argument("start-maximized")
-        option.add_argument("--disable-extensions")
-        option.add_argument("--disable-notifications")
-        option.add_experimental_option('excludeSwitches', ['enable-logging'])
+    option = Options()
+    # option.add_argument("--window-size=1920,1080")
+    option.add_argument("--start-maximized")
+    # option.add_argument("--headless")
+    # option.add_argument('--disable-blink-features=AutomationControlled')
+    option.add_argument("--disable-infobars")
+    option.add_argument("start-maximized")
+    option.add_argument("--disable-extensions")
+    option.add_argument("--disable-notifications")
+    option.add_experimental_option('excludeSwitches', ['enable-logging'])
+    try:
 
         driver = webdriver.Chrome("./chromedriver.exe", options=option)
         # Perform scraping based on the selected search type and form data
@@ -49,6 +49,7 @@ def scrape_propertysharks(search_type, category, location):
             'Office': 'office',
             'Industrial': 'industrial',
             'Retail': 'retail',
+            'Retail Space': 'retail',
             'Land': 'commercial-real-estate',
             'Flex Space': 'flex-space',
             'Agriculture': 'commercial-real-estate',
@@ -245,7 +246,7 @@ def scrape_propertysharks(search_type, category, location):
 
         for i in project_links:
             listings.append(i.text)
-            print(f"i: {i.text}")
+            # print(f"i: {i.text}")
 
         # print(f"listings: {listings}\n\n")
         result = parse_list(listings)
@@ -272,9 +273,9 @@ def scrape_propertysharks(search_type, category, location):
 
         return result
 
-    # except Exception as e:
-    #     print(e)
-    #     driver.quit()
+    except Exception as e:
+        print(e)
+        driver.quit()
 
 
 def parse_list(list_data):

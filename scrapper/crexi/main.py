@@ -1,22 +1,6 @@
 import re
-
-from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import time
 import pyautogui as pg
-import json
-# import pyperclip as pc
-# from utils import handle_exception
-
-
-import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -41,7 +25,7 @@ def scrape_crexi(location, category, search_type):
     # option.add_experimental_option('excludeSwitches', ['enable-   logging'])
 
     option = Options()
-    option.add_argument("--window-size=1920,1080")
+    # option.add_argument("--window-size=1920,1080")
     option.add_argument("--start-maximized")
     # option.add_argument("--headless")
     # option.add_argument('--disable-blink-features=AutomationControlled')
@@ -52,13 +36,14 @@ def scrape_crexi(location, category, search_type):
     option.add_experimental_option('excludeSwitches', ['enable-logging'])
 
     driver = webdriver.Chrome("./chromedriver.exe", options=option)
+    if category == 'Retail Space':
+        category = 'Retail'
 
 
 
     # driver = webdriver.Chrome(options=option, service=service_)
     # driver.set_window_rect(width=1500, height=1000)
     try:
-        # print(f"Scraping {search_type} {category} in {location}...")
         url = ""
         if search_type == "forSale":
             url = f"https://www.crexi.com/properties?types%5B%5D={category}"
@@ -71,12 +56,6 @@ def scrape_crexi(location, category, search_type):
 
         # print("url: ",url)
         driver.get(url)
-        window_width = driver.execute_script("return window.innerWidth;")
-        window_height = driver.execute_script("return window.innerHeight;")
-
-        # Print the width and height
-        # print("Window Width:", window_width)
-        # print("Window Height:", window_height)
 
         try:
             pop_up = WebDriverWait(driver, 5).until(
@@ -106,10 +85,10 @@ def scrape_crexi(location, category, search_type):
         driver.find_element(By.XPATH,
                             "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-header/crx-header-content/div/div[1]/crx-header-typeahead-search/crx-mobile-search/div/div[4]/div/div/crx-search-bar-pills/form/div/div/input").send_keys(
             f"{location}")
-        time.sleep(2)
+        time.sleep(3)
 
         pg.press('enter')
-        time.sleep(7)
+        time.sleep(3)
 
         # Replace the XPath with the correct one for your element
         element_xpath = "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/article/div/div/crx-search-grid-view/div/crx-search-grid/div/div/div[1]/crx-search-results/div/div"
@@ -128,7 +107,21 @@ def scrape_crexi(location, category, search_type):
             # If the pop-up does not appear, continue with scraping the main content
             pass
 
-        time.sleep(20)
+        time.sleep(25)
+        try:
+            pop_up = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "mat-dialog-container"))
+            )
+
+            # Close the pop-up by clicking on the close button
+            close_button = pop_up.find_element(By.CSS_SELECTOR, "button.cui-modal-close")
+            close_button.click()
+
+        except Exception as e:
+            print(e)
+            # If the pop-up does not appear, continue with scraping the main content
+            pass
+
         try:
             wait = WebDriverWait(driver, 10)
             element = wait.until(EC.element_to_be_clickable((By.ID, "mat-mdc-slide-toggle-1-button")))
@@ -169,8 +162,6 @@ def scrape_crexi(location, category, search_type):
                 driver.execute_script("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element)
 
         # Main XPath for the element containing the items
-        main_xpath = "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/article/div/div/crx-search-grid-view/div/crx-search-grid/div"
-        p = "//div[@class='properties-holder properties-holder-map ng-star-inserted']"
         pp = "//div[@class='cls-guard']"
         # Find the main element
 
@@ -294,9 +285,8 @@ def scrape_crexi(location, category, search_type):
 
         return item_data
     except Exception as e:
-        print(e)
         driver.quit()
-        return None
+        print(e)
 
 
 def replace_spaces_and_commas(string):

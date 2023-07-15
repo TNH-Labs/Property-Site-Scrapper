@@ -22,15 +22,30 @@ def scrape_showcase(search_type, category, location):
 
         category_mappings = {
             "For Rent": {
-                "All Spaces": "commercial-real-estate",
-                "Office Space": "office-space",
-                "Industrial and Warehouse Space": "warehouses",
-                "Retail Space": "retail-space",
-                "Restaurants": "restaurants",
-                "Flex Space": "flex-space",
-                "Medical Offices": "medical-offices",
-                "Coworking Space": "coworking-space",
-                "Land": "land"
+                'All Spaces': 'commercial-real-estate',
+                'Office Space': 'office-space',
+                'Industrial and Warehouse Space': 'warehouses',
+                'Retail Space': 'retail-space',
+                'Restaurants': 'restaurants',
+                'Flex Space': 'flex-space',
+                'Medical Offices': 'medical-offices',
+                'Coworking Space': 'coworking-space',
+                'Land': 'land',
+                'Flex': '',
+                'Special Purpose': '',
+                'Hotel and Motel': '',
+                'Events': '',
+                'Office': '',
+                'Agriculture': '',
+                'Multi-Family': '',
+                'Health Care': '',
+                'Restaurant': '',
+                'Mixed Use': '',
+                'Medical': '',
+                'Industrial': '',
+                'Coworking': '',
+                'Sports and Entertainment': '',
+                'Senior Housing': ''
             },
             "For Sale": {
                 "All Property Types": "commercial-real-estate",
@@ -96,7 +111,7 @@ def scrape_showcase(search_type, category, location):
         if search_type == 'For Rent':
             for key, values in sale_data[0].items():
                 if key == 'about':
-                    print(f"values: {values}...")
+                    # print(f"values: {values}...")
                     for i in values:
                         # print(f"i: {i}...")
                         try:
@@ -126,8 +141,8 @@ def scrape_showcase(search_type, category, location):
                             listings.append(listing)
         else:
             for key, values in sale_data[0].items():
-                print(f"key: {key}...")
-                print(f"values: {values}...")
+                # print(f"key: {key}...")
+                # print(f"values: {values}...")
                 if key == 'about':
                     for i in values:
                         # print(f"i: {i}...")
@@ -151,7 +166,7 @@ def scrape_showcase(search_type, category, location):
 
     except Exception as e:
         print(f"Error: {e}...")
-        return None
+        pass
 
 
 def replace_spaces_and_commas(string):
