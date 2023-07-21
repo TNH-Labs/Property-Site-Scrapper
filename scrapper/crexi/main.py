@@ -36,8 +36,6 @@ def scrape_crexi(location, category, search_type):
     option.add_experimental_option('excludeSwitches', ['enable-logging'])
 
     driver = webdriver.Chrome("./chromedriver.exe", options=option)
-    if category == 'Retail Space':
-        category = 'Retail'
 
 
 
@@ -108,6 +106,7 @@ def scrape_crexi(location, category, search_type):
             pass
 
         time.sleep(25)
+        print("start scraping")
         try:
             pop_up = WebDriverWait(driver, 5).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "mat-dialog-container"))
@@ -121,7 +120,8 @@ def scrape_crexi(location, category, search_type):
             print(e)
             # If the pop-up does not appear, continue with scraping the main content
             pass
-
+        print("check")
+        time.sleep(5)
         try:
             wait = WebDriverWait(driver, 10)
             element = wait.until(EC.element_to_be_clickable((By.ID, "mat-mdc-slide-toggle-1-button")))
@@ -173,7 +173,6 @@ def scrape_crexi(location, category, search_type):
         scroll_to_element(driver, main_element)
 
         # Find all item elements
-        time.sleep(5)
         item_elements = main_element.find_elements(By.XPATH, ".//crx-search-results/div/div/crx-property-tile-aggregate")
 
         # print(f"\n\n item elements: {item_elements}")
@@ -195,9 +194,9 @@ def scrape_crexi(location, category, search_type):
             print(f"Found project URL {index}: {project_url}")
     
         """
-
+        time.sleep(5)
         html_response = driver.page_source
-        print(f"HTML response: {html_response}....")
+        # print(f"HTML response: {html_response}....")
         """
         another = driver.find_elements(By.XPATH, "//crx-property-tile-aggregate[@class='ng-star-inserted']")
         print(f"another: {another.text}")
@@ -234,7 +233,7 @@ def scrape_crexi(location, category, search_type):
 
         for index, link in enumerate(project_links, start=1):
             project_url = link.get_attribute('href')
-            print(f"Found project URL {index}: {project_url}")
+            # print(f"Found project URL {index}: {project_url}")
 
             listing = listings[index - 1]  # Get the corresponding listing element
 
@@ -253,12 +252,11 @@ def scrape_crexi(location, category, search_type):
 
                 # Create a dictionary to store the item details
                 item = {
-                    'image_url': image_url,
+                    'image': image_url,
                     'price': price,
-                    'title': title,
+                    'name': title,
                     'description': description,
                     'address': address,
-                    'view_om_button': view_om_button is not None,
                     'url': project_url
                 }
 

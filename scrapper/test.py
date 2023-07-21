@@ -24,11 +24,26 @@
 # merged_data.to_csv("merged_data.csv", index=False)
 #
 # print("Data merging and deduplication completed!")
-list1 = ["Popular Industries", "Restaurants & Food", "Retail", "Service Businesses", "Wholesale & Distributors", "Transportation & Storage", "Online & Technology", "Automotive & Boat", "Franchise Opportunities", "All Industries"]
-list2 = ["Office","Retail","Multifamily", "Industrial", "Mixed Use", "Hospitality", "Land", "Self Storage", "Mobile Home Park", "Senior Living", "Special Purpose", "Note/Loan"]
-list3 = ["Office", "Industrial", "Retail", "Restaurant", "Shopping Center", "Multifamily", "Specialty", "Health Care", "Hospitality", "Sports & Entertainment", "Land", "Residential Income"]
-list4 = ["Office","Retail","Multifamily", "Industrial", "Mixed Use", "Hospitality", "Land", "Self Storage", "Mobile Home Park", "Senior Living", "Special Purpose", "Note/Loan"]
+def find_matching_key(list1, list2):
+    matching_key = None
+    for key in list1:
+        for element in list2:
+            if key.lower() in element.lower():
+                matching_key = key
+                break
+        if matching_key:
+            break
+    return matching_key
 
-# add all the lists and remove duplicates
-list5 = list(set(list1 + list2))
-print(list5)
+# Example usage
+list1 = ["Office", "Retail", "Industrial", "Land", "Special Purpose", "Restaurant", "Retail Space"]
+list2 = ['Land', 'Flex', 'Industrial and Warehouse Space', 'Retail Space', 'Special Purpose', 'Restaurants', 'Hotel and Motel', 'Events', 'Office', 'Agriculture', 'Multi-Family', 'Health Care', 'Restaurant', 'Mixed Use', 'Office Space', 'Medical', 'Medical Offices', 'Industrial', 'Flex Space', 'Coworking', 'Retail', 'Sports and Entertainment', 'Coworking Space', 'Senior Housing', 'All Spaces']
+
+user_input = input("Enter a value: ")
+
+matching_key = find_matching_key(list1, list2)
+
+if matching_key:
+    print(matching_key)
+else:
+    print(None)

@@ -166,7 +166,7 @@ def search(request):
         # Access and process the form data here
         search_type = request.POST.get('search-type')
         property_name = None
-        if search_type == 'forLease':
+        if search_type == 'forLease' or search_type == 'forRent':
             property_name = request.POST.get('propertytypeforlease')
         elif search_type == 'forSale':
             property_name = request.POST.get('propertytypeforsale')
@@ -176,8 +176,10 @@ def search(request):
             property_name = request.POST.get('propertytypeBBS')
         location = request.POST.get('geography')
 
+        print(property_name, "property_name")
+
         # Perform scraping using the form data
-        if search_type == 'forLease' or search_type == 'forSale':
+        if search_type == 'forLease' or search_type == 'forSale' or search_type == 'forRent':
             with ThreadPoolExecutor() as executor:
                 futures = [executor.submit(scrape_loopnet, search_type, property_name, location),
                            executor.submit(scrape_showcase, search_type, property_name, location),
@@ -191,7 +193,7 @@ def search(request):
                         scraped_data += result
                     except:
                         pass
-        elif search_type == 'auction' or search_type == 'forSale' or search_type == 'forLease':
+        elif search_type == 'auction':
             with ThreadPoolExecutor() as executor:
                 futures = [executor.submit(scrape_loopnet, search_type, property_name, location),
                            executor.submit(scrape_crexi, location, property_name, search_type)]
@@ -207,7 +209,7 @@ def search(request):
             with ThreadPoolExecutor() as executor:
                 scraped_data = executor.submit(scrape_loopnet, search_type, property_name, location).result()
 
-        print(f"Scraped data: {scraped_data}...")
+        # print(f"Scraped data: {scraped_data}...")
 
         request.session['scrapdata'] = scraped_data
         request.session['name'] = location

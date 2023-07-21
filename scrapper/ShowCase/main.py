@@ -31,21 +31,22 @@ def scrape_showcase(search_type, category, location):
                 'Medical Offices': 'medical-offices',
                 'Coworking Space': 'coworking-space',
                 'Land': 'land',
-                'Flex': '',
-                'Special Purpose': '',
-                'Hotel and Motel': '',
-                'Events': '',
-                'Office': '',
-                'Agriculture': '',
-                'Multi-Family': '',
-                'Health Care': '',
-                'Restaurant': '',
-                'Mixed Use': '',
-                'Medical': '',
-                'Industrial': '',
-                'Coworking': '',
-                'Sports and Entertainment': '',
-                'Senior Housing': ''
+                'Flex': 'flex-space',
+                'Retail': 'retail-space',
+                'Special Purpose': 'commercial-real-estate',
+                'Hotel and Motel': 'commercial-real-estate',
+                'Events': 'commercial-real-estate',
+                'Office': 'office-space',
+                'Agriculture': 'land',
+                'Multi-Family': 'commercial-real-estate',
+                'Health Care': 'commercial-real-estate',
+                'Restaurant': 'restaurants',
+                'Mixed Use': 'commercial-real-estate',
+                'Medical': 'medical-offices',
+                'Industrial': 'warehouses',
+                'Coworking': 'coworking-space',
+                'Sports and Entertainment': 'commercial-real-estate',
+                'Senior Housing': 'commercial-real-estate'
             },
             "For Sale": {
                 "All Property Types": "commercial-real-estate",
@@ -60,8 +61,32 @@ def scrape_showcase(search_type, category, location):
                 "Land": "land",
                 "Shopping Centers & Malls": "shopping-centers-malls",
                 "Sports & Entertainment Properties": "sports-entertainment-properties",
-                "Residential Income Properties": "residential-income-properties"
+                "Residential Income Properties": "residential-income-properties",
+                'Retail': 'retail-space',
+                'Mobile Home Park': 'commercial-real-estate',
+                'Shopping Center': 'shopping-centers-malls',
+                'Note/Loan': 'commercial-real-estate',
+                'Restaurant': 'restaurants',
+                'Flex Space': 'industrial-space',
+                'Multifamily': 'apartment-buildings',
+                'Health Care': 'health-care-facilities',
+                'Industrial': 'industrial-space',
+                'Events': 'commercial-real-estate',
+                'Self Storage': 'commercial-real-estate',
+                'Hotel and Motel': 'hotels',
+                'Residential Income': 'residential-income-properties',
+                'Sports & Entertainment': 'sports-entertainment-properties',
+                'Senior Housing': 'commercial-real-estate',
+                'Mixed Use': 'commercial-real-estate',
+                'Agriculture': 'land',
+                'Sports and Entertainment': 'sports-entertainment-properties',
+                'Hospitality': 'commercial-real-estate',
+                'Special Purpose': 'commercial-real-estate',
+                'Specialty': 'commercial-real-estate',
+                'Multi-Family': 'apartment-buildings',
+                'Senior Living': 'commercial-real-estate'
             }
+
         }
 
 
@@ -86,7 +111,7 @@ def scrape_showcase(search_type, category, location):
 
         print("Before response...")
         # Make the request with the selected proxy and parameters
-        client = ZenRowsClient("e810791d06d06c2bba5a8ee7696f03d65385c0cd")
+        client = ZenRowsClient("8cb92d04c60beddcb5a5f13c119f96f566525144")
         # url = "https://www.loopnet.com/"
         params = {"autoparse": "true"}
 

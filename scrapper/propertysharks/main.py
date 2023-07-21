@@ -1,5 +1,7 @@
 import ast
+import urllib
 
+import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
@@ -20,7 +22,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 import pyautogui as pg
-
+import urllib.parse
+import urllib.request
 from ..CSV import save_dict_to_csv
 
 
@@ -45,6 +48,7 @@ def scrape_propertysharks(search_type, category, location):
         print(f"Search type: {search_type}")
         print(f"Property name: {category}")
         print(f"Location: {location}\n\n")
+        action = ActionChains(driver)
         category_mappings = {
             'Office': 'office',
             'Industrial': 'industrial',
@@ -61,8 +65,15 @@ def scrape_propertysharks(search_type, category, location):
             'Mixed Use': 'commercial-real-estate',
             'Multi-Family': 'commercial-real-estate',
             'Events': 'commercial-real-estate',
-
+            'Restaurants': 'commercial-real-estate',
+            'Office Space': 'office',
+            'Medical': 'commercial-real-estate',
+            'Medical Offices': 'commercial-real-estate',
+            'Coworking': 'office',
+            'Senior Housing': 'commercial-real-estate',
+            'All Spaces': 'commercial-real-estate'
         }
+
         if search_type == 'forRent' or search_type == 'forLease':
             search_type = 'Lease'
         elif search_type == 'forSale':
@@ -72,6 +83,7 @@ def scrape_propertysharks(search_type, category, location):
         print(f"cateogry: {category}")
 
         category_name = category_mappings[category]
+        #
         print(f"category_name: {category_name}")
 
 
@@ -115,43 +127,40 @@ def scrape_propertysharks(search_type, category, location):
 
         print(f"Scraping {url}...")
         url = replace_spaces_and_commas(url)
+        # url = quote_plus(url)
+
         print(f"Scraping {url}...")
 
 
         print("Before response...")
         # Make the request with the selected proxy and parameters
-        client = ZenRowsClient("e810791d06d06c2bba5a8ee7696f03d65385c0cd")
+        # client = ZenRowsClient("e810791d06d06c2bba5a8ee7696f03d65385c0cd")
+        # params = {"autoparse": "true"}
+        client = ZenRowsClient("8cb92d04c60beddcb5a5f13c119f96f566525144")
+        # url = "https://www.loopnet.com/"
         params = {"autoparse": "true"}
 
         response = client.get(url, params=params)
+
+        # print(response.text)
+        print("After response...")
+        response.raise_for_status()
+        # response = client.get(url, params=params)
 
         # print(f"response: {response}\n\n")
         # print(f"response.text: {response.text}\n\n")
 
         # print(response.text)
+        # print(response.text, "response3")
         print("After response...")
-        response.raise_for_status()
-
-
-        json_data = json.loads("".join(response.text))
-        modified_data = remove_at_symbols(json_data)
-
-
-        # print(f"modified_data: {modified_data}\n\n")
-
-        # print(f"modified_data: {modified_data}\n\n")
+        # response.raise_for_status()
 
         listings = []
-        csv_listings = []
-        item = modified_data[1]
 
         if search_type == 'auctions':
             print("yes it iis auctions")
 
-        # print(f"search_type: {search_type}\n\n")
 
-        # driver = webdriver.Chrome(options=option, service=service_)
-        # driver.set_window_rect(width=1500, height=1000)
         driver.get(url)
         time.sleep(1)
 
@@ -168,15 +177,6 @@ def scrape_propertysharks(search_type, category, location):
         )
         filter_box.click()
 
-        # if search_type == 'forLease':
-        #     wait = WebDriverWait(driver, 20)
-        #     element = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[value='Lease']")))
-        #     element.click()
-        # elif search_type == 'forSale':
-        #     wait = WebDriverWait(driver, 20)
-        #     element = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[value='Sale']")))
-        #     element.click()
-
 
         apply_box = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div/form/div/div[1]/div[2]/div/div/div[3]/button[1]"))
@@ -185,18 +185,29 @@ def scrape_propertysharks(search_type, category, location):
 
         time.sleep(3)
 
-        xpath = "//div//ul[@class='listings']"
+        xpath = "//div//ul[@class='listings']/li"
+
+        # fin = driver.find_element(By.XPATH, xpath)
+        # print(fin.get_attribute('id'), "-------//////////////////")
+        # print(fin.text)
+
+
+        # for i in fin:
+        #     # i.get_attribute('id')
+        #     # print(i.text,"***************************")
+        #     fin_id = driver.find_element(By.XPATH, i)
+        #     print(fin_id.get_attribute('id'))
+        #     # print(i.get_attribute('id'), "-------//////////////////")
+
         # try:
         # print("url: ",url)
         # listing_element = driver.find_element(By.XPATH, all )
-        wait = WebDriverWait(driver, 15)
+        wait = WebDriverWait(driver, 20)
         listing_element = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
         # print(f"Found {listing_element} listing element")
 
 
         def scroll_to_element(driver, element):
-            # driver.execute_script("arguments[0].scrollIntoView(true);", element)
-            # driver.execute_script("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element)
             viewport_height = driver.execute_script("return window.innerHeight")
 
             # Get the height of the element
@@ -213,55 +224,76 @@ def scrape_propertysharks(search_type, category, location):
                 time.sleep(0.2)
                 driver.execute_script("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element)
 
+
         scroll = driver.find_element(By.XPATH, "//div[@class='inner']")
         project_links = listing_element.find_elements(By.XPATH, "//div//ul[@class='listings']//li[@class='property-details property-details-basic']")
-        scroll_to_element(driver, scroll)
 
         time.sleep(5)
+        scroll_to_element(driver, scroll)
+
         # Find all elements matching the XPath expression
         """
         correct the xpath go more in depth below
         """
-        src = "//div[@class='photo']//img[@class='property']"
+        fin_container = driver.find_elements(By.XPATH, xpath)
+        lis = []
         srcs = []
         hrefs = []
-        link = listing_element.find_elements(By.XPATH, src)
+        for i in range(1,len(fin_container)):
+            single_container = driver.find_element(By.XPATH, f"//div//ul[@class='listings']/li[{i}]")
+            container = driver.find_element(By.XPATH, f"//div//ul[@class='listings']/li[@id={single_container.get_attribute('id')}]")
+            listings.append(container.text)
+            lis.append(single_container.get_attribute("id"))
+            image_url = single_container.find_element(By.XPATH, "//div[@class='item-presentation']/div/img")
+            url = single_container.find_element(By.XPATH, "//div[@class='item-information']/div[@class='action-bar']/a")
+            srcs.append(image_url.get_attribute("src"))
+            hrefs.append(url.get_attribute("href"))
+            # print(container.text)
+            # print(single_container.get_attribute("id"))
+            # print(image_url.get_attribute("src"))
+            # print(url.get_attribute("href"))
 
-        for i in link:
-            z = i.get_attribute("src")
-            srcs.append(z)
-            print(f"src: {z}\n\n")
+        print(lis, "liss")
+        # src = "//class[@id='map_container']/div[2]/div[3]/div/div[1]"
+        # # action.move_to_element(src).perform()
+        # time.sleep(3)
+        # srcs = []
+        # hrefs = []
+        # # wait = WebDriverWait(driver, 25)
+        # # wait.until(EC.presence_of_element_located((By.XPATH, src)))
+        # link = driver.find_elements(By.XPATH, src)
+        #
+        # for i in link:
+        #     z = i.get_attribute("src")
+        #     srcs.append(z)
+        #     print(f"src: {z}\n\n")
+        #
+        # href = "//div//ul[@class='listings']//div[@class='action-bar']//a[@class='btn btn-ghost-primary']"
+        #
+        # links = listing_element.find_elements(By.XPATH, href)
+        # for i in links:
+        #     z = i.get_attribute("href")
+        #     hrefs.append(z)
+        #     # print(f"href: {z}\n\n")
+        # listing_element.find_elements(By.XPATH, xpath)
+        # print(f"Found {len(project_links)} project links")
+        # print(f"Found {project_links} project links")
 
-        href = "//div[@class='action-bar']//a[@class='btn btn-ghost-primary']"
 
-        links = listing_element.find_elements(By.XPATH, href)
-        for i in links:
-            z = i.get_attribute("href")
-            hrefs.append(z)
-            print(f"href: {z}\n\n")
-        listing_element.find_elements(By.XPATH, xpath)
-        print(f"Found {len(project_links)} project links")
-        print(f"Found {project_links} project links")
-
-
-        for i in project_links:
-            listings.append(i.text)
+        # for i in project_links:
+        #     print(i.text, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        #     listings.append(i.text)
             # print(f"i: {i.text}")
 
         # print(f"listings: {listings}\n\n")
         result = parse_list(listings)
-        # for i in result:
-        #     i["url"] = links[result.index(i)].get_attribute("href")
-        #     i["image"] = link[result.index(i)].get_attribute("src")
-        print(f"result: {len(result)}\n\n")
-        print(f"hrefs : {len(hrefs)}\n\n")
-        print(f"srcs : {len(srcs)}\n\n")
-        # for i in result:
-        #     print(f"i: {i}\n\n")
+        # print(f"result: {len(result)}\n\n")
+        # print(f"hrefs : {len(hrefs)}\n\n")
+        # print(f"srcs : {len(srcs)}\n\n")
 
         result = update_result(result, hrefs, srcs)
 
-        print(f"result: {result}\n\n")
+        # print(f"result: {result}\n\n")
 
 
         driver.quit()
@@ -283,6 +315,7 @@ def parse_list(list_data):
     for item in list_data:
         item_data = item.strip("'").split("\n")
         if len(item_data) >= 7:
+            # print(item_data, "//////-------------------")
             parsed_item = {
                 "Title": item_data[0],
                 "address": item_data[1],

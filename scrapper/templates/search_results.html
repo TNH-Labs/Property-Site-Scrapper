@@ -19,8 +19,17 @@
                         <p>Region: {{list.region}}</p>
 
                     <p>Description: {{ list.description }}</p>
-                    <p>URL: <a href="{{ list.url }}">{{ list.url }}</a></p>
+                        {% if list.url %}
+                        <p>URL: <a href="{{ list.url }}">{{ list.url }}</a></p>
+                        {% endif %}
+                        <p>URL: <a href="{{ list.href }}">{{ list.src }}</a></p>
+
+
+                        {% if list.image %}
                     <img src="{{ list.image }}" alt="Listing Image">
+                    {% endif %}
+                    <img src="{{ list.src }}" alt="Listing Image">
+
                     {% if list.price %}
                         <p>Price: {{ listing.price }}</p>
                     {% endif %}

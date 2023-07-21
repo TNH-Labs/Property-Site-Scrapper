@@ -26,9 +26,28 @@ def scrape_loopnet(search_type, category, location):
                 'Retail': 'retail-space',
                 'Restaurant': 'restaurants',
                 'Flex': 'flex-space',
+                'Land': 'land',
+                'Flex Space': 'flex-space',
+                'Industrial and Warehouse Space': 'industrial-space',
+                'Retail Space': 'retail-space',
+                'Special Purpose': 'restaurants',
+                'Restaurants': 'restaurants',
+                'Hotel and Motel': 'restaurants',
+                'Events': 'restaurants',
+                'Office': 'office',
+                'Agriculture': 'land',
+                'Multi-Family': 'land',
+                'Health Care': 'medical-offices',
+                'Mixed Use': 'medical-offices',
+                'Office Space': 'office',
                 'Medical': 'medical-offices',
-                'Land': 'land'
-            },
+                'Medical Offices': 'medical-offices',
+                'Sports and Entertainment': 'coworking-space',
+                'Coworking Space': 'coworking-space',
+                'Senior Housing': 'coworking-space',
+                'All Spaces': 'coworking-space'
+            }
+,
             'forSale': {
                 'Office': 'office-buildings',
                 'Industrial': 'industrial-properties',
@@ -36,13 +55,39 @@ def scrape_loopnet(search_type, category, location):
                 'Restaurant': 'restaurants',
                 'Shopping Center': 'shopping-centers',
                 'Multifamily': 'apartment-buildings',
-                'Specialty': 'commercial-real-estate',
+                'Mobile Home Park': 'residential-income-properties',
+                'Retail Space': 'retail-properties',
+                'Note/Loan': 'commercial-real-estate',
+                'Flex Space': 'industrial-properties',
                 'Health Care': 'health-care-facilities',
-                'Hospitality': 'hospitality-properties',
-                'Sports & Entertainment': 'sports-entertainment-properties',
+                'Events': 'commercial-real-estate',
+                'Self Storage': 'commercial-real-estate',
+                'Restaurants': 'restaurants',
+                'Hotel and Motel': 'hospitality-properties',
+                'Shopping Centers & Malls': 'shopping-centers',
+                'Residential Income': 'residential-income-properties',
+                'Hotels & Motels': 'hospitality-properties',
+                'Industrial Space': 'industrial-properties',
                 'Land': 'land',
-                'Residential Income': 'residential-income-properties'
-            },
+                'Sports & Entertainment': 'sports-entertainment-properties',
+                'Health Care Properties': 'health-care-facilities',
+                'Senior Housing': 'residential-income-properties',
+                'Mixed Use': 'commercial-real-estate',
+                'All Property Types': 'commercial-real-estate',
+                'Agriculture': 'land',
+                'Office Space': 'office-buildings',
+                'Sports and Entertainment': 'sports-entertainment-properties',
+                'Multifamily Apartments': 'apartment-buildings',
+                'Investment Properties': 'commercial-real-estate',
+                'Hospitality': 'hospitality-properties',
+                'Special Purpose': 'commercial-real-estate',
+                'Residential Income Properties': 'residential-income-properties',
+                'Sports & Entertainment Properties': 'sports-entertainment-properties',
+                'Specialty': 'commercial-real-estate',
+                'Multi-Family': 'apartment-buildings',
+                'Senior Living': 'residential-income-properties'
+            }
+,
             'BBSType': {
                 'Restaurants & Food': 'restaurants-and-food-businesses-for-sale',
                 'Retail': 'retail-businesses-for-sale',
@@ -56,9 +101,9 @@ def scrape_loopnet(search_type, category, location):
             },
             'auctions': {}
         }
-
-        print(f"search_type: {search_type}")
-        print(f"cateogry: {category}")
+        # print("accessing loopnet")
+        # print(f"search_type: {search_type}")
+        # print(f"cateogry loopnet: {category}")
 
         def get_value_by_type_and_key(search_type, key):
             if search_type in category_mappings and key in category_mappings[search_type]:
@@ -67,6 +112,7 @@ def scrape_loopnet(search_type, category, location):
                 return None
 
         category_name = get_value_by_type_and_key(search_type, category)
+        print(f"category_name loopnet: {category_name}")
 
 
         # Construct the URL
@@ -79,28 +125,28 @@ def scrape_loopnet(search_type, category, location):
         else:
             url = f"https://www.loopnet.com/search/commercial-real-estate/{location.lower()}/auctions/"
 
-        print(f"Scraping {url}...")
+        # print(f"Scraping {url}...")
         url = replace_spaces_and_commas(url)
-        print(f"Scraping {url}...")
+        # print(f"Scraping {url}...")
 
 
         print("Before response...")
         # Make the request with the selected proxy and parameters
-        client = ZenRowsClient("e810791d06d06c2bba5a8ee7696f03d65385c0cd")
+        client = ZenRowsClient("8cb92d04c60beddcb5a5f13c119f96f566525144")
         # url = "https://www.loopnet.com/"
         params = {"autoparse": "true"}
 
         response = client.get(url, params=params)
 
         # print(response.text)
-        print("After response...")
+        # print("After response...")
         response.raise_for_status()
 
 
         json_data = json.loads("".join(response.text))
         modified_data = remove_at_symbols(json_data)
 
-        print(f"modified_data: {modified_data[2]}\n\n")
+        # print(f"modified_data: {modified_data[2]}\n\n..............................")
 
         # print(f"modified_data: {modified_data}\n\n")
 
@@ -108,24 +154,21 @@ def scrape_loopnet(search_type, category, location):
         csv_listings = []
         item = modified_data[1]
 
-        if search_type == 'auctions':
-            print("yes it iis auctions")
-
-        print(f"search_type: {search_type}\n\n")
+        # print(f"search_type: {search_type}\n\n")
 
 
 
         if search_type == 'forLease' or search_type == 'forSale':
             if item:
-                print(f"item: {item}\n\n")
+                # print(f"item: {item}\n\n")
                 for key, value in item.items():
                     # print(f"Key: {key}\n\n")
                     # print(f"Value: {value}\n\n")
                     if key == 'about':
-                        print(f"Value: {value}\n\n")
+                        # print(f"Value: {value}\n\n")
                         try:
                             for i in value:
-                                print(f"i: {i}\n\n")
+                                # print(f"i: {i}\n\n")
                                 for key, value in i['item'].items():
                                     if 'availableAtOrFrom' in i['item']:
                                         if 'address' in i['item']['availableAtOrFrom']:
@@ -197,7 +240,7 @@ def scrape_loopnet(search_type, category, location):
                 # print(f"Key: {key}\n\n")
                 # print(f"Value: {value}\n\n")
                 if key == 'about':
-                    print(f"Value: {value}\n\n")
+                    # print(f"Value: {value}\n\n")
                     try:
                         for i in value:
                             print(f"i: {i}\n\n")
@@ -248,8 +291,8 @@ def BBS(response):
     listings = []
     csv_listings = []
     bbs = response
-    print(f"bbs: {bbs}\n\n")
-    print(f"url: {url}\n\n")
+    # print(f"bbs: {bbs}\n\n")
+    # print(f"url: {url}\n\n")
     # print(f"bbs: {bbs}\n\n")
     print("-------------------------------------------end bbs-------------------------------------------")
     for key, value in bbs.items():
