@@ -333,7 +333,7 @@ def BBS(response):
                         listings.append(listing)
 
 
-    # print(f"\n\nListings:", listings)
+    print(f"\n\nListings loopnet:", listings)
     return listings
 
 def remove_at_symbols(obj):

@@ -21,7 +21,7 @@ def Csv(request):
     for i in data:
         updated_dict = {}
         for key, value in i.items():
-            if key != 'image' and key != 'url' and key != 'image_url' and key != 'img_url':
+            if key != 'image' and key != 'url' and key != 'image_url' and key != 'img_url' or key != 'href' or key != 'src':
                 updated_dict[key] = value
         updated_data.append(updated_dict)
     keys = updated_data[0].keys()

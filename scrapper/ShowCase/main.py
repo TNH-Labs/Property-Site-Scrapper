@@ -143,23 +143,23 @@ def scrape_showcase(search_type, category, location):
                             listing = {
                                 "name": i["item"]["name"],
                                 "description": i["item"]["description"],
-                                "url": url + i["item"]["url"],
-                                "image": i["item"]["image"],
                                 "price": i["item"]["price"] + " " + i["item"]["priceCurrency"],
                                 "address": i["item"]["availableAtOrFrom"]["address"]["streetAddress"],
                                 "locality": i["item"]["availableAtOrFrom"]["address"]["addressLocality"],
                                 "region": i["item"]["availableAtOrFrom"]["address"]["addressRegion"],
+                                "url": url + i["item"]["url"],
+                                "image": i["item"]["image"],
                             }
                         except:
                             listing = {
                                 "name": i["name"],
                                 "description": i["description"],
-                                "url": url + i["url"],
-                                "image": i["image"],
                                 "price": i["price"] + " " + i["priceCurrency"],
                                 "address": i["availableAtOrFrom"]["address"]["streetAddress"],
                                 "locality": i["availableAtOrFrom"]["address"]["addressLocality"],
                                 "region": i["availableAtOrFrom"]["address"]["addressRegion"],
+                                "url": url + i["url"],
+                                "image": i["image"],
                             }
 
                         if listing not in listings:
@@ -174,19 +174,19 @@ def scrape_showcase(search_type, category, location):
                         listing = {
                             "name": i["item"]["name"],
                             "description": i["item"]["description"],
-                            "url": url + i["item"]["url"],
-                            "image": i["item"]["image"],
-                            "price": i["item"]["price"] + " " + i["item"]["priceCurrency"],
                             "address": i["item"]["availableAtOrFrom"]["address"]["streetAddress"],
                             "locality": i["item"]["availableAtOrFrom"]["address"]["addressLocality"],
                             "region": i["item"]["availableAtOrFrom"]["address"]["addressRegion"],
+                            "url": url + i["item"]["url"],
+                            "image": i["item"]["image"],
+                            # "price": i["item"]["price"] + " " + i["item"]["priceCurrency"],
                         }
                         if listing not in listings:
                             listings.append(listing)
 
 
 
-
+        print(f"Listings showcase: {listings}...")
         return listings
 
     except Exception as e:

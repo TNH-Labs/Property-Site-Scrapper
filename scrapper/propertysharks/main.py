@@ -30,17 +30,17 @@ from ..CSV import save_dict_to_csv
 
 
 def scrape_propertysharks(search_type, category, location):
-    option = Options()
-    # option.add_argument("--window-size=1920,1080")
-    option.add_argument("--start-maximized")
-    # option.add_argument("--headless")
-    # option.add_argument('--disable-blink-features=AutomationControlled')
-    option.add_argument("--disable-infobars")
-    option.add_argument("start-maximized")
-    option.add_argument("--disable-extensions")
-    option.add_argument("--disable-notifications")
-    option.add_experimental_option('excludeSwitches', ['enable-logging'])
-    try:
+        option = Options()
+        # option.add_argument("--window-size=1920,1080")
+        option.add_argument("--start-maximized")
+        # option.add_argument("--headless")
+        # option.add_argument('--disable-blink-features=AutomationControlled')
+        option.add_argument("--disable-infobars")
+        option.add_argument("start-maximized")
+        option.add_argument("--disable-extensions")
+        option.add_argument("--disable-notifications")
+        option.add_experimental_option('excludeSwitches', ['enable-logging'])
+    # try:
 
         driver = webdriver.Chrome("./chromedriver.exe", options=option)
         # Perform scraping based on the selected search type and form data
@@ -213,8 +213,8 @@ def scrape_propertysharks(search_type, category, location):
             # Get the height of the element
             element_height = element.size["height"]
 
-            print(f"vewport_height: {viewport_height}\n\n")
-            print(f"element_height: {element_height}\n\n")
+            # print(f"vewport_height: {viewport_height}\n\n")
+            # print(f"element_height: {element_height}\n\n")
 
             # Calculate the number of times to scroll to fully reveal the element
             num_scrolls = element_height // viewport_height + 1
@@ -248,12 +248,12 @@ def scrape_propertysharks(search_type, category, location):
             url = single_container.find_element(By.XPATH, "//div[@class='item-information']/div[@class='action-bar']/a")
             srcs.append(image_url.get_attribute("src"))
             hrefs.append(url.get_attribute("href"))
-            # print(container.text)
+            print(container.text)
             # print(single_container.get_attribute("id"))
             # print(image_url.get_attribute("src"))
             # print(url.get_attribute("href"))
 
-        print(lis, "liss")
+        # print(lis, "liss")
         # src = "//class[@id='map_container']/div[2]/div[3]/div/div[1]"
         # # action.move_to_element(src).perform()
         # time.sleep(3)
@@ -292,6 +292,7 @@ def scrape_propertysharks(search_type, category, location):
         # print(f"srcs : {len(srcs)}\n\n")
 
         result = update_result(result, hrefs, srcs)
+        print(f"result sharks: {result}\n\n")
 
         # print(f"result: {result}\n\n")
 
@@ -305,9 +306,9 @@ def scrape_propertysharks(search_type, category, location):
 
         return result
 
-    except Exception as e:
-        print(e)
-        driver.quit()
+    # except Exception as e:
+    #     print(e)
+    #     driver.quit()
 
 
 def parse_list(list_data):
@@ -315,13 +316,62 @@ def parse_list(list_data):
     for item in list_data:
         item_data = item.strip("'").split("\n")
         if len(item_data) >= 7:
-            # print(item_data, "//////-------------------")
-            parsed_item = {
-                "Title": item_data[0],
-                "address": item_data[1],
-                "type": item_data[2],
-                "Space": item_data[6]
-            }
+            # try:
+            #     print(item_data, "//////-------------------")
+            #     print(item_data[1].strip(",")[2:], "&&&&&&&&&&&&&&&&&")
+            #     print(item_data[1].strip(","), "&&&&&&&&&&&&&&&&&")
+            #     print(item_data[1].strip(",").split(","), "&&&&&&&&&&&&&&&&&")
+            #     print(item_data[1].strip(",").split(",")[-2], "^^^^^^^^^^^^^^^^^^^^^")
+            #     print(item_data[1].strip(",").split(",")[-2:], "^^^^^^^^^^^^^^^^^^^^^")
+            #     print(item_data[1].strip(",").split(",")[:-2:], "^^^^^^^^^^^^^^^^^^^^^")
+            # except:
+            #     pass
+            if item_data[3][0] == '$' or item_data[3] == 'Contact for pricing':
+                print("access if")
+
+                parsed_item = {
+                    "Title": item_data[0],
+                    "description": item_data[3],
+                    "price": item_data[3] if item_data[3][1] == '$' else "Undisclosed",
+                    "address": item_data[0],
+                    "locality": item_data[1].strip(",").split(",")[-2],
+                    "region": item_data[1].strip(",").split(",")[-1],
+                }
+            elif item_data[3][0] != '$' or item_data[3] != 'Contact for pricing':
+                # print("access else")
+                # print(item_data, "-------------------))()()()())")
+                # print(item_data[3][1], ")(()()---------------090909")
+                #
+                #
+                # print(item_data, "//////-------------------")
+                # print(item_data[3].strip(",")[2:], "&&&&&&&&&&&&&&&&&")
+                # print(item_data[3].strip(","), "&&&&&&&&&&&&&&&&&")
+                # print(item_data[3].strip(",").split(","), "&&&&&&&&&&&&&&&&&")
+                # print(item_data[3].strip(",").split(",")[-2:], "^^^^^^^^^^^^^^^^^^^^^")
+                # print(item_data[3].strip(",").split(",")[:-2:], "^^^^^^^^^^^^^^^^^^^^^")
+                # print(item_data[3].strip(",").split(",")[-2], "^^^^^^^^^^^^^^^^^^^^^")
+                try:
+
+                    print("--------------------------1st try -------------------------")
+                    parsed_item = {
+                        "Title": item_data[1],
+                        "description": item_data[2],
+                        "price": "Undisclosed",
+                        "address": item_data[3],
+                        "locality": item_data[3].strip(",").split(",")[-2],
+                        "region": item_data[1].strip(",").split(",")[-1],
+                    }
+                except:
+                    print("--------------------------2nd except -------------------------")
+                    parsed_item = {
+                        "Title": item_data[1],
+                        "description": item_data[2],
+                        "price": "Undisclosed",
+                        "address": item_data[3],
+                        "locality": item_data[3].strip(",").split(",")[-2],
+                        "region": item_data[1].strip(",").split(",")[-1],
+                    }
+
             parsed_data.append(parsed_item)
     return parsed_data
 
