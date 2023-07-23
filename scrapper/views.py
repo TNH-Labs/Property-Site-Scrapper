@@ -82,10 +82,10 @@ def Csv(request):
                 if key == 'region' and len(value.strip(" ")) == 2:
                     full_name = convert_to_full_state_name(value.strip(" "))
                     updated_dict[key] = full_name
-                elif key == 'region' and value not in state_abbreviations.values():
+                elif key == 'region' and value not in state_abbreviations.values() or len(value) == 0 or value == ' ':
                    pass
                 else:
-                    updated_dict[key] = value
+                    updated_dict[key] = value.strip(" ")
 
         updated_data.append(updated_dict)
     keys = updated_data[0].keys()
