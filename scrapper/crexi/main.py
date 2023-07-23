@@ -252,11 +252,13 @@ def scrape_crexi(location, category, search_type):
 
                 # Create a dictionary to store the item details
                 item = {
-                    'image': image_url,
-                    'price': price,
                     'name': title,
                     'description': description,
+                    'price': price if price else "N/A",
                     'address': address,
+                    'locality': address.strip(",").split(",")[-2],
+                    'region': address.strip(",").split(",")[-1][1:3],
+                    'image': image_url,
                     'url': project_url
                 }
 
@@ -280,6 +282,8 @@ def scrape_crexi(location, category, search_type):
 
         # Close the browser
         driver.quit()
+
+        print(f"item_data: {item_data}")
 
         return item_data
     except Exception as e:

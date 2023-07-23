@@ -180,6 +180,7 @@ def scrape_loopnet(search_type, category, location):
                                                 listing = {
                                                     'name': i['item']['name'],
                                                     'description': i['item']['description'],
+                                                    'price': "undisclosed",
                                                     'url': i['item']['url'],
                                                     'image': i['item']['image'],
                                                     'address': address,
@@ -196,6 +197,7 @@ def scrape_loopnet(search_type, category, location):
                             listing = {
                                 'name': value['name'],
                                 'description': value['description'],
+                                'price': "undisclosed",
                                 'url': value['url'],
                                 'image': value['image'],
                                 'address': address,
@@ -220,6 +222,7 @@ def scrape_loopnet(search_type, category, location):
                                     'type': i['item']['type'],
                                     'name': i['item']['name'],
                                     'description': i['item']['description'],
+                                        'price': "undisclosed",
                                     'url': i['item']['url'],
                                     'image': i['item']['image'],
                                     'category': i['item']['category'],
@@ -243,7 +246,7 @@ def scrape_loopnet(search_type, category, location):
                     # print(f"Value: {value}\n\n")
                     try:
                         for i in value:
-                            print(f"i: {i}\n\n")
+                            # print(f"i: {i}\n\n")
                             for key, value in i['item'].items():
                                 if 'availableAtOrFrom' in i['item']:
                                     if 'address' in i['item']['availableAtOrFrom']:
@@ -255,6 +258,7 @@ def scrape_loopnet(search_type, category, location):
                                             listing = {
                                                 'name': i['item']['name'],
                                                 'description': i['item']['description'],
+                                                'price': "undisclosed",
                                                 'url': i['item']['url'],
                                                 'image': i['item']['image'],
                                                 'address': address,
@@ -271,6 +275,7 @@ def scrape_loopnet(search_type, category, location):
                         listing = {
                             'name': value['name'],
                             'description': value['description'],
+                            'price': "undisclosed",
                             'url': value['url'],
                             'image': value['image'],
                             'address': address,
@@ -281,9 +286,10 @@ def scrape_loopnet(search_type, category, location):
                             listings.append(listing)
 
 
-
+        print(f"listings: {listings}\n\n")
         return listings
     except:
+        print("Error in loopnet.py")
         pass
 
 def BBS(response):
@@ -310,7 +316,7 @@ def BBS(response):
                             'listNumber': i['listNumber'],
                             'header': i['header'],
                             'description': i['description'],
-                            'price': i['price'],
+                            'price': i['price'] if 'price' in i else "N/A",
                             'image': url + i['img'][0],
                             'location': i['location'],
                             'cashFlow': i['cashFlow'],
@@ -323,7 +329,7 @@ def BBS(response):
                             'listNumber': i['listNumber'],
                             'header': i['header'],
                             'description': i['description'],
-                            'price': i['price'],
+                            'price': i['price'] if 'price' in i else "N/A",
                             'image': url + i['img'][0],
                             'location': i['location'],
 

@@ -330,12 +330,12 @@ def parse_list(list_data):
                 print("access if")
 
                 parsed_item = {
-                    "Title": item_data[0],
+                    "name": item_data[0],
                     "description": item_data[3],
                     "price": item_data[3] if item_data[3][1] == '$' else "Undisclosed",
                     "address": item_data[0],
-                    "locality": item_data[1].strip(",").split(",")[-2],
-                    "region": item_data[1].strip(",").split(",")[-1],
+                    "locality": item_data[1].strip(" ").split(",")[-2],
+                    "region": item_data[1].strip(" ").split(",")[-1],
                 }
             elif item_data[3][0] != '$' or item_data[3] != 'Contact for pricing':
                 # print("access else")
@@ -354,22 +354,22 @@ def parse_list(list_data):
 
                     print("--------------------------1st try -------------------------")
                     parsed_item = {
-                        "Title": item_data[1],
+                        "name": item_data[1],
                         "description": item_data[2],
                         "price": "Undisclosed",
                         "address": item_data[3],
-                        "locality": item_data[3].strip(",").split(",")[-2],
-                        "region": item_data[1].strip(",").split(",")[-1],
+                        "locality": item_data[3].strip(" ").split(",")[-2],
+                        "region": item_data[1].strip(" ").split(",")[-1],
                     }
                 except:
                     print("--------------------------2nd except -------------------------")
                     parsed_item = {
-                        "Title": item_data[1],
+                        "name": item_data[1],
                         "description": item_data[2],
                         "price": "Undisclosed",
                         "address": item_data[3],
-                        "locality": item_data[3].strip(",").split(",")[-2],
-                        "region": item_data[1].strip(",").split(",")[-1],
+                        "locality": item_data[3].strip(" ").split(",")[-2],
+                        "region": item_data[1].strip(" ").split(",")[-1],
                     }
 
             parsed_data.append(parsed_item)

@@ -10,9 +10,65 @@ from .propertysharks.main import scrape_propertysharks
 from concurrent.futures import ThreadPoolExecutor, as_completed
 global scraped_data
 
+state_abbreviations = {
+        "AL": "Alabama",
+        "AK": "Alaska",
+        "AZ": "Arizona",
+        "AR": "Arkansas",
+        "CA": "California",
+        "CO": "Colorado",
+        "CT": "Connecticut",
+        "DE": "Delaware",
+        "FL": "Florida",
+        "GA": "Georgia",
+        "HI": "Hawaii",
+        "ID": "Idaho",
+        "IL": "Illinois",
+        "IN": "Indiana",
+        "IA": "Iowa",
+        "KS": "Kansas",
+        "KY": "Kentucky",
+        "LA": "Louisiana",
+        "ME": "Maine",
+        "MD": "Maryland",
+        "MA": "Massachusetts",
+        "MI": "Michigan",
+        "MN": "Minnesota",
+        "MS": "Mississippi",
+        "MO": "Missouri",
+        "MT": "Montana",
+        "NE": "Nebraska",
+        "NV": "Nevada",
+        "NH": "New Hampshire",
+        "NJ": "New Jersey",
+        "NM": "New Mexico",
+        "NY": "New York",
+        "NC": "North Carolina",
+        "ND": "North Dakota",
+        "OH": "Ohio",
+        "OK": "Oklahoma",
+        "OR": "Oregon",
+        "PA": "Pennsylvania",
+        "RI": "Rhode Island",
+        "SC": "South Carolina",
+        "SD": "South Dakota",
+        "TN": "Tennessee",
+        "TX": "Texas",
+        "UT": "Utah",
+        "VT": "Vermont",
+        "VA": "Virginia",
+        "WA": "Washington",
+        "WV": "West Virginia",
+        "WI": "Wisconsin",
+        "WY": "Wyoming"
+    }
 
 def index(request):
     return render(request, 'index.html')
+
+
+def convert_to_full_state_name(abbreviation):
+    return state_abbreviations.get(abbreviation.upper(), abbreviation).title()
 
 
 def Csv(request):
@@ -21,8 +77,16 @@ def Csv(request):
     for i in data:
         updated_dict = {}
         for key, value in i.items():
-            if key != 'image' and key != 'url' and key != 'image_url' and key != 'img_url' or key != 'href' or key != 'src':
-                updated_dict[key] = value
+            # if key != 'image' and key != 'url' and key != 'image_url' and key != 'img_url' or key != 'href' or key != 'src':
+            if key == 'name' or key == 'description' or key == 'price' or key == 'address' or key == 'locality' or key == 'region' or key == 'title':
+                if key == 'region' and len(value.strip(" ")) == 2:
+                    full_name = convert_to_full_state_name(value.strip(" "))
+                    updated_dict[key] = full_name
+                elif key == 'region' and value not in state_abbreviations.values():
+                   pass
+                else:
+                    updated_dict[key] = value
+
         updated_data.append(updated_dict)
     keys = updated_data[0].keys()
     response = HttpResponse(content_type='text/csv')
@@ -232,5 +296,8 @@ def search(request):
 
     # Render the search form template for GET requests
     return render(request, 'search.html')
+
+
+
 
 

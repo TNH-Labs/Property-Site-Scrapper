@@ -143,7 +143,7 @@ def scrape_showcase(search_type, category, location):
                             listing = {
                                 "name": i["item"]["name"],
                                 "description": i["item"]["description"],
-                                "price": i["item"]["price"] + " " + i["item"]["priceCurrency"],
+                                "price": i["item"]["price"] + " " + i["item"]["priceCurrency"] if i["item"]["price"] else "N/A",
                                 "address": i["item"]["availableAtOrFrom"]["address"]["streetAddress"],
                                 "locality": i["item"]["availableAtOrFrom"]["address"]["addressLocality"],
                                 "region": i["item"]["availableAtOrFrom"]["address"]["addressRegion"],
@@ -154,7 +154,7 @@ def scrape_showcase(search_type, category, location):
                             listing = {
                                 "name": i["name"],
                                 "description": i["description"],
-                                "price": i["price"] + " " + i["priceCurrency"],
+                                "price": i["price"] + " " + i["priceCurrency"] if i["price"] else "N/A",
                                 "address": i["availableAtOrFrom"]["address"]["streetAddress"],
                                 "locality": i["availableAtOrFrom"]["address"]["addressLocality"],
                                 "region": i["availableAtOrFrom"]["address"]["addressRegion"],
