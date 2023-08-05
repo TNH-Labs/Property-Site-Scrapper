@@ -3,6 +3,7 @@ import time
 import pyautogui as pg
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
@@ -51,9 +52,14 @@ def scrape_crexi(location, category, search_type):
             url = f"https://www.crexi.com/properties?tradingStatuses%5B%5D=Auction&types%5B%5D={category}"
 
 
-
-        # print("url: ",url)
         driver.get(url)
+
+        try:
+            # Wait for a maximum of 40 seconds for the page to be loaded completely
+            WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.XPATH, '//body')))
+            print("Page loaded successfully!")
+        except TimeoutException:
+            print("Timeout: Page took too long to load.")
 
         try:
             pop_up = WebDriverWait(driver, 5).until(
@@ -70,7 +76,7 @@ def scrape_crexi(location, category, search_type):
             pass
 
         # Wait for the search box to be clickable
-        search_box = WebDriverWait(driver, 10).until(
+        search_box = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.XPATH,
                                         "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-header/crx-header-content/div/div[1]/crx-header-typeahead-search/crx-mobile-search/div/div[4]/div/div/crx-search-bar-pills/form/div"))
         )
@@ -83,10 +89,10 @@ def scrape_crexi(location, category, search_type):
         driver.find_element(By.XPATH,
                             "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-header/crx-header-content/div/div[1]/crx-header-typeahead-search/crx-mobile-search/div/div[4]/div/div/crx-search-bar-pills/form/div/div/input").send_keys(
             f"{location}")
-        time.sleep(3)
+        time.sleep(1)
 
         pg.press('enter')
-        time.sleep(3)
+        time.sleep(10)
 
         # Replace the XPath with the correct one for your element
         element_xpath = "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/article/div/div/crx-search-grid-view/div/crx-search-grid/div/div/div[1]/crx-search-results/div/div"
@@ -106,7 +112,6 @@ def scrape_crexi(location, category, search_type):
             pass
 
         time.sleep(25)
-        print("start scraping")
         try:
             pop_up = WebDriverWait(driver, 5).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "mat-dialog-container"))
@@ -120,8 +125,6 @@ def scrape_crexi(location, category, search_type):
             print(e)
             # If the pop-up does not appear, continue with scraping the main content
             pass
-        print("check")
-        time.sleep(5)
         try:
             wait = WebDriverWait(driver, 10)
             element = wait.until(EC.element_to_be_clickable((By.ID, "mat-mdc-slide-toggle-1-button")))
@@ -162,6 +165,7 @@ def scrape_crexi(location, category, search_type):
                 driver.execute_script("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element)
 
         # Main XPath for the element containing the items
+        time.sleep(5)
         pp = "//div[@class='cls-guard']"
         # Find the main element
 
@@ -194,7 +198,6 @@ def scrape_crexi(location, category, search_type):
             print(f"Found project URL {index}: {project_url}")
     
         """
-        time.sleep(5)
         html_response = driver.page_source
         # print(f"HTML response: {html_response}....")
         """
@@ -209,31 +212,36 @@ def scrape_crexi(location, category, search_type):
         soup = BeautifulSoup(html_response, 'html.parser')
 
         # alternate:
-        """
-            re = "//crx-search-results"
-            wait = WebDriverWait(driver, 15)
-            listing_element = wait.until(EC.presence_of_element_located((By.XPATH, re)))
-            ree = "//crx-property-tile-aggregate[@class='ng-star-inserted']"
-            link = listing_element.find_elements(By.XPATH, ree)
-            for i in link:
-                print(f"i: {i.text}")
-                print(f"i: {i.get_attribute('href')}")
-        """
+        # re = "//crx-search-results"
+        # wait = WebDriverWait(driver, 15)
+        # listing_element = wait.until(EC.presence_of_element_located((By.XPATH, re)))
+        path2 = ''
+        links = "//a[@class='cover-link']"
+        ree = "//crx-property-tile-aggregate[@class='ng-star-inserted']"
+        pics = ""
+        link = driver.find_elements(By.XPATH, ree)
+        links = driver.find_elements(By.XPATH, links)
+        if len(link) == len(links):
+            for i in range(len(link)):
+                print(f"i: {link[i].text}")
+        elif len(link) > len(links):
+            for i in range(len(links)):
+                print(f"i: {links[i].text}")
+        elif len(link) < len(links):
+            for i in range(len(link)):
+                print(f"i: {link[i].text}")
 
         # Find the container element that holds the listings
         listings_container = soup.find('crx-search-results')
-        # print(f"Found {listings_container} listings container")
+        # print(f"listings_container: {listings_container}....")
 
         # Find all the listing elements within the container
         listings = listings_container.find_all('crx-property-tile-aggregate')
-        # print(f"Found {listings} listings")
-        # print(listings)
-        # Loop through the listings and extract the desired information
+        print(f"listings: {listings}....")
         item_data = []  # List to store the item details
 
         for index, link in enumerate(project_links, start=1):
             project_url = link.get_attribute('href')
-            # print(f"Found project URL {index}: {project_url}")
 
             listing = listings[index - 1]  # Get the corresponding listing element
 
@@ -251,18 +259,21 @@ def scrape_crexi(location, category, search_type):
                 view_om_button = listing.find('span', text='View OM')
 
                 # Create a dictionary to store the item details
-                item = {
-                    'name': title,
-                    'description': description,
-                    'price': price if price else "N/A",
-                    'address': address,
-                    'locality': address.strip(",").split(",")[-2],
-                    'region': address.strip(",").split(",")[-1][1:3],
-                    'image': image_url,
-                    'url': project_url
-                }
+                if address.strip(",").split(",")[-2] not in location or address.strip(",").split(",")[-2] != location:
+                    pass
+                else:
+                    item = {
+                        'name': title,
+                        'description': description,
+                        'price': price if price else "Undisclosed",
+                        'address': address,
+                        'locality': address.strip(",").split(",")[-2],
+                        'region': address.strip(",").split(",")[-1][1:3],
+                        'image': image_url,
+                        'url': project_url
+                    }
 
-                item_data.append(item)
+                    item_data.append(item)
 
         # Print the item details
         """
@@ -283,7 +294,7 @@ def scrape_crexi(location, category, search_type):
         # Close the browser
         driver.quit()
 
-        print(f"item_data: {item_data}")
+        print(f"listings Crexi: {item_data}listings Crexi\n\n")
 
         return item_data
     except Exception as e:

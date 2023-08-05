@@ -3,6 +3,7 @@ import urllib
 
 import requests
 from selenium import webdriver
+from selenium.common import TimeoutException
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 from bs4 import BeautifulSoup
@@ -45,9 +46,7 @@ def scrape_propertysharks(search_type, category, location):
         driver = webdriver.Chrome("./chromedriver.exe", options=option)
         # Perform scraping based on the selected search type and form data
         print("\n\nScraping propertysharks...")
-        print(f"Search type: {search_type}")
-        print(f"Property name: {category}")
-        print(f"Location: {location}\n\n")
+
         action = ActionChains(driver)
         category_mappings = {
             'Office': 'office',
@@ -79,18 +78,12 @@ def scrape_propertysharks(search_type, category, location):
         elif search_type == 'forSale':
             search_type = 'Sale'
 
-        print(f"search_type: {search_type}")
-        print(f"cateogry: {category}")
+
 
         category_name = category_mappings[category]
-        #
-        print(f"category_name: {category_name}")
 
 
         location = replace_spaces_and_commas(location)
-
-        print(f"category_name: {category_name}")
-        print(f"location: {location}")
 
 
         # Construct the URL
@@ -125,43 +118,31 @@ def scrape_propertysharks(search_type, category, location):
 
 
 
-        print(f"Scraping {url}...")
+        # print(f"Scraping {url}...")
         url = replace_spaces_and_commas(url)
-        # url = quote_plus(url)
 
-        print(f"Scraping {url}...")
+        print(f"url of propertyshark: {url}")
 
-
-        print("Before response...")
-        # Make the request with the selected proxy and parameters
-        # client = ZenRowsClient("e810791d06d06c2bba5a8ee7696f03d65385c0cd")
-        # params = {"autoparse": "true"}
         client = ZenRowsClient("8cb92d04c60beddcb5a5f13c119f96f566525144")
         # url = "https://www.loopnet.com/"
         params = {"autoparse": "true"}
 
         response = client.get(url, params=params)
 
-        # print(response.text)
-        print("After response...")
         response.raise_for_status()
-        # response = client.get(url, params=params)
 
-        # print(f"response: {response}\n\n")
-        # print(f"response.text: {response.text}\n\n")
-
-        # print(response.text)
-        # print(response.text, "response3")
-        print("After response...")
-        # response.raise_for_status()
 
         listings = []
 
-        if search_type == 'auctions':
-            print("yes it iis auctions")
 
 
         driver.get(url)
+        try:
+            # Wait for a maximum of 10 seconds for the page to be loaded completely
+            WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.XPATH, '//body')))
+            print("Page loaded successfully!")
+        except TimeoutException:
+            print("Timeout: Page took too long to load.")
         time.sleep(1)
 
         path = "onetrust-accept-btn-handler"
@@ -183,26 +164,11 @@ def scrape_propertysharks(search_type, category, location):
         )
         apply_box.click()
 
-        time.sleep(3)
 
         xpath = "//div//ul[@class='listings']/li"
 
-        # fin = driver.find_element(By.XPATH, xpath)
-        # print(fin.get_attribute('id'), "-------//////////////////")
-        # print(fin.text)
 
-
-        # for i in fin:
-        #     # i.get_attribute('id')
-        #     # print(i.text,"***************************")
-        #     fin_id = driver.find_element(By.XPATH, i)
-        #     print(fin_id.get_attribute('id'))
-        #     # print(i.get_attribute('id'), "-------//////////////////")
-
-        # try:
-        # print("url: ",url)
-        # listing_element = driver.find_element(By.XPATH, all )
-        wait = WebDriverWait(driver, 20)
+        wait = WebDriverWait(driver, 10)
         listing_element = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
         # print(f"Found {listing_element} listing element")
 
@@ -213,10 +179,6 @@ def scrape_propertysharks(search_type, category, location):
             # Get the height of the element
             element_height = element.size["height"]
 
-            # print(f"vewport_height: {viewport_height}\n\n")
-            # print(f"element_height: {element_height}\n\n")
-
-            # Calculate the number of times to scroll to fully reveal the element
             num_scrolls = element_height // viewport_height + 1
 
             # Execute JavaScript to scroll the element into view incrementally
@@ -248,54 +210,11 @@ def scrape_propertysharks(search_type, category, location):
             url = single_container.find_element(By.XPATH, "//div[@class='item-information']/div[@class='action-bar']/a")
             srcs.append(image_url.get_attribute("src"))
             hrefs.append(url.get_attribute("href"))
-            print(container.text)
-            # print(single_container.get_attribute("id"))
-            # print(image_url.get_attribute("src"))
-            # print(url.get_attribute("href"))
 
-        # print(lis, "liss")
-        # src = "//class[@id='map_container']/div[2]/div[3]/div/div[1]"
-        # # action.move_to_element(src).perform()
-        # time.sleep(3)
-        # srcs = []
-        # hrefs = []
-        # # wait = WebDriverWait(driver, 25)
-        # # wait.until(EC.presence_of_element_located((By.XPATH, src)))
-        # link = driver.find_elements(By.XPATH, src)
-        #
-        # for i in link:
-        #     z = i.get_attribute("src")
-        #     srcs.append(z)
-        #     print(f"src: {z}\n\n")
-        #
-        # href = "//div//ul[@class='listings']//div[@class='action-bar']//a[@class='btn btn-ghost-primary']"
-        #
-        # links = listing_element.find_elements(By.XPATH, href)
-        # for i in links:
-        #     z = i.get_attribute("href")
-        #     hrefs.append(z)
-        #     # print(f"href: {z}\n\n")
-        # listing_element.find_elements(By.XPATH, xpath)
-        # print(f"Found {len(project_links)} project links")
-        # print(f"Found {project_links} project links")
+        result = parse_list(listings, location)
 
-
-        # for i in project_links:
-        #     print(i.text, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-        #     listings.append(i.text)
-            # print(f"i: {i.text}")
-
-        # print(f"listings: {listings}\n\n")
-        result = parse_list(listings)
-        # print(f"result: {len(result)}\n\n")
-        # print(f"hrefs : {len(hrefs)}\n\n")
-        # print(f"srcs : {len(srcs)}\n\n")
 
         result = update_result(result, hrefs, srcs)
-        print(f"result sharks: {result}\n\n")
-
-        # print(f"result: {result}\n\n")
-
 
         driver.quit()
 
@@ -304,6 +223,7 @@ def scrape_propertysharks(search_type, category, location):
         #     driver.quit()
         #     return None
 
+        print(f"resutl of propertyshark: {result}")
         return result
 
     # except Exception as e:
@@ -311,68 +231,49 @@ def scrape_propertysharks(search_type, category, location):
     #     driver.quit()
 
 
-def parse_list(list_data):
+def parse_list(list_data, location):
     parsed_data = []
     for item in list_data:
         item_data = item.strip("'").split("\n")
         if len(item_data) >= 7:
-            # try:
-            #     print(item_data, "//////-------------------")
-            #     print(item_data[1].strip(",")[2:], "&&&&&&&&&&&&&&&&&")
-            #     print(item_data[1].strip(","), "&&&&&&&&&&&&&&&&&")
-            #     print(item_data[1].strip(",").split(","), "&&&&&&&&&&&&&&&&&")
-            #     print(item_data[1].strip(",").split(",")[-2], "^^^^^^^^^^^^^^^^^^^^^")
-            #     print(item_data[1].strip(",").split(",")[-2:], "^^^^^^^^^^^^^^^^^^^^^")
-            #     print(item_data[1].strip(",").split(",")[:-2:], "^^^^^^^^^^^^^^^^^^^^^")
-            # except:
-            #     pass
-            if item_data[3][0] == '$' or item_data[3] == 'Contact for pricing':
-                print("access if")
+            if item_data[1].strip(" ").split(",")[-2] not in location:
+                pass
+            else:
 
-                parsed_item = {
-                    "name": item_data[0],
-                    "description": item_data[3],
-                    "price": item_data[3] if item_data[3][1] == '$' else "Undisclosed",
-                    "address": item_data[0],
-                    "locality": item_data[1].strip(" ").split(",")[-2],
-                    "region": item_data[1].strip(" ").split(",")[-1],
-                }
-            elif item_data[3][0] != '$' or item_data[3] != 'Contact for pricing':
-                # print("access else")
-                # print(item_data, "-------------------))()()()())")
-                # print(item_data[3][1], ")(()()---------------090909")
-                #
-                #
-                # print(item_data, "//////-------------------")
-                # print(item_data[3].strip(",")[2:], "&&&&&&&&&&&&&&&&&")
-                # print(item_data[3].strip(","), "&&&&&&&&&&&&&&&&&")
-                # print(item_data[3].strip(",").split(","), "&&&&&&&&&&&&&&&&&")
-                # print(item_data[3].strip(",").split(",")[-2:], "^^^^^^^^^^^^^^^^^^^^^")
-                # print(item_data[3].strip(",").split(",")[:-2:], "^^^^^^^^^^^^^^^^^^^^^")
-                # print(item_data[3].strip(",").split(",")[-2], "^^^^^^^^^^^^^^^^^^^^^")
-                try:
+                if item_data[3][0] == '$' or item_data[3] == 'Contact for pricing':
 
-                    print("--------------------------1st try -------------------------")
                     parsed_item = {
-                        "name": item_data[1],
-                        "description": item_data[2],
-                        "price": "Undisclosed",
-                        "address": item_data[3],
-                        "locality": item_data[3].strip(" ").split(",")[-2],
+                        "name": item_data[0],
+                        "description": item_data[3],
+                        "price": item_data[3] if item_data[3][1] == '$' else "Undisclosed",
+                        "address": item_data[0],
+                        "locality": item_data[1].strip(" ").split(",")[-2],
                         "region": item_data[1].strip(" ").split(",")[-1],
                     }
-                except:
-                    print("--------------------------2nd except -------------------------")
-                    parsed_item = {
-                        "name": item_data[1],
-                        "description": item_data[2],
-                        "price": "Undisclosed",
-                        "address": item_data[3],
-                        "locality": item_data[3].strip(" ").split(",")[-2],
-                        "region": item_data[1].strip(" ").split(",")[-1],
-                    }
+                elif item_data[3][0] != '$' or item_data[3] != 'Contact for pricing':
+                    try:
 
-            parsed_data.append(parsed_item)
+                        parsed_item = {
+                            "name": item_data[1],
+                            "description": item_data[2],
+                            "price": "Undisclosed",
+                            "address": item_data[3],
+                            "locality": item_data[3].strip(" ").split(",")[-2],
+                            "region": item_data[1].strip(" ").split(",")[-1],
+                        }
+                    except:
+                        parsed_item = {
+                            "name": item_data[1],
+                            "description": item_data[2],
+                            "price": "Undisclosed",
+                            "address": item_data[3],
+                            "locality": item_data[3].strip(" ").split(",")[-2],
+                            "region": item_data[1].strip(" ").split(",")[-1],
+                        }
+
+                parsed_data.append(parsed_item)
+    print(f"Response of PropertySharks {parsed_data}Response of PropertySharks\n\n"
+          f"")
     return parsed_data
 
 def remove_at_symbols(obj):
@@ -413,7 +314,6 @@ def find_value(data, target):
 def replace_spaces_and_commas(string):
     # Split the string into words
     words = string.split()
-    print(f"words: {words}...")
 
     # If there are exactly two words
     if len(words) == 2:
@@ -437,11 +337,11 @@ def replace_spaces_and_commas(string):
         new_string = string.replace(",", "-")
 
     if new_string[0] == "/":
-        print(f"new stirng = {new_string}")
+        # print(f"new stirng = {new_string}")
         # remove it
         new_string = new_string[1] + new_string[2:]
 
-    print(f"new stirng = {new_string}")
+    # print(f"new stirng = {new_string}")
 
     return new_string
 

@@ -14,4 +14,5 @@ urlpatterns = [
     path('search_crexi/', views.crexi, name='search_Crexi'),
     path('search_propertysharks/', views.propertysharks, name='search_propertysharks'),
     path('search/', views.search, name='search'),
+    path('search_at_once/', views.search_at_once, name='search_at_once'),
 ]

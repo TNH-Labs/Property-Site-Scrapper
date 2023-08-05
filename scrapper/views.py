@@ -1,5 +1,7 @@
 # views.py
 import csv
+import datetime
+
 import requests
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -73,6 +75,7 @@ def convert_to_full_state_name(abbreviation):
 
 def Csv(request):
     data = request.session['scrapdata']
+    print(f"Csv data: {data} data \n\n")
     updated_data = []
     for i in data:
         updated_dict = {}
@@ -298,6 +301,96 @@ def search(request):
     return render(request, 'search.html')
 
 
+def search_at_once(request):
+    if request.method == 'POST':
+        # Access and process the form data here
+        search_type = request.POST.get('search-type')
+        property_name = None
+        if search_type == 'forLease' or search_type == 'forRent':
+            property_name = request.POST.get('propertytypeforlease')
+        elif search_type == 'forSale':
+            property_name = request.POST.get('propertytypeforsale')
+        elif search_type == 'auction':
+            property_name = 'auction'  # Adjust the field name for auctions
+        elif search_type == 'BBSType':
+            property_name = request.POST.get('propertytypeBBS')
+        locat = request.POST.get('geography')
+
+        # Split the location string by the "/" sign to get cities
+        locat = locat.strip("").split('/')
+        print(locat, "location")
+
+        # Create a list to store the scraped data for all cities
+        all_scraped_data = []
+
+        scraped_data = []
+
+        with ThreadPoolExecutor() as executor:
+            futures = []
+            for location in locat:
+                if search_type == 'forLease' or search_type == 'forSale' or search_type == 'forRent':
+                    futures.extend([
+                        executor.submit(scrape_loopnet, search_type, property_name, location),
+                        executor.submit(scrape_showcase, search_type, property_name, location),
+                        executor.submit(scrape_propertysharks, search_type, property_name, location),
+                        executor.submit(scrape_crexi, location, property_name, search_type)
+                    ])
+                elif search_type == 'auction':
+                    futures.extend([
+                        executor.submit(scrape_loopnet, search_type, property_name, location),
+                        executor.submit(scrape_crexi, location, property_name, search_type)
+                    ])
+                else:
+                    # In this case, there's only one task, no need for concurrent execution
+                    scraped_data = scrape_loopnet(search_type, property_name, location)
+                    all_scraped_data.append(scraped_data)
+
+            for future in as_completed(futures):
+                try:
+                    result = future.result()
+                    all_scraped_data.append(result)
+                except Exception as e:
+                    print(f"An error occurred: {e}")
 
 
+        updated_data = []
+        # print(all_scraped_data, "all_scraped_data")
+        # print(scraped_data, "scraped_data")
+        try:
+            for j in all_scraped_data:
+                try:
+                    for i in j:
+                        updated_dict = {}
+                        for key, value in i.items():
+                            # if key != 'image' and key != 'url' and key != 'image_url' and key != 'img_url' or key != 'href' or key != 'src':
+                            if key == 'name' or key == 'description' or key == 'price' or key == 'address' or key == 'locality' or key == 'region' or key == 'title':
+                                if key == 'region' and len(value.strip(" ")) == 2:
+                                    full_name = convert_to_full_state_name(value.strip(" "))
+                                    updated_dict[key] = full_name
+                                elif key == 'region' and value not in state_abbreviations.values() or len(
+                                        value) == 0 or value == ' ':
+                                    pass
+                                else:
+                                    updated_dict[key] = value.strip(" ")
+                        print(updated_dict, "updated_dict")
 
+                        updated_data.append(updated_dict)
+                except:
+                    pass
+
+        except:
+            pass
+
+        # print(updated_data, "updated data")
+        keys = updated_data[0].keys()
+        response = HttpResponse(content_type='text/csv')
+        name = "bulk_data" + "_" + str(datetime.datetime.now())
+        response['Content-Disposition'] = f'attachment; filename="{name}.csv"'
+        writer = csv.writer(response)
+        writer.writerow(keys)  # add header row
+        for row in updated_data:
+            print(row.values())
+            writer.writerow(row.values())
+        return response
+    # Render the search form template for GET requests
+    return render(request, 'all.html')

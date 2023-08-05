@@ -9,9 +9,6 @@ def scrape_showcase(search_type, category, location):
     try:
         # Perform scraping based on the selected search type and form data
         print("\n\nScraping LoopNet...")
-        print(f"Search type: {search_type}")
-        print(f"Property name: '{category}'")
-        print(f"Location: {location}\n\n")
         if search_type == 'forSale':
             search_type = 'For Sale'
         else:
@@ -98,7 +95,6 @@ def scrape_showcase(search_type, category, location):
 
 
         category_name = get_value_by_type_and_key(search_type, "Retail Space")
-        print(f"Category name: {category_name}")
 
         location = replace_spaces_and_commas(location)
         # Construct the URL
@@ -106,10 +102,6 @@ def scrape_showcase(search_type, category, location):
             url = f"https://www.showcase.com/{location}/{category_name}/for-sale/"
         else:
             url = f"https://www.showcase.com/{location}/{category_name}/for-rent/"
-
-        print(f"Scraping {url}...")
-
-        print("Before response...")
         # Make the request with the selected proxy and parameters
         client = ZenRowsClient("8cb92d04c60beddcb5a5f13c119f96f566525144")
         # url = "https://www.loopnet.com/"
@@ -118,7 +110,6 @@ def scrape_showcase(search_type, category, location):
         response = client.get(url, params=params)
 
         # print(response.text)
-        print("After response...")
         response.raise_for_status()
 
 
@@ -129,7 +120,6 @@ def scrape_showcase(search_type, category, location):
 
         sale_data = [modified_data[0]]
 
-        print(search_type, "search type...")
         url = "https://www.showcase.com"
         listings = []
 
@@ -139,54 +129,63 @@ def scrape_showcase(search_type, category, location):
                     # print(f"values: {values}...")
                     for i in values:
                         # print(f"i: {i}...")
-                        try:
+                        if i["item"]["availableAtOrFrom"]["address"]["addressLocality"] not in location:
+                            print("Not in location...")
+                        else:
+                            print("In location...")
+
+                        if i["item"]["availableAtOrFrom"]["address"]["addressLocality"] not in location:
+                            pass
+                        else:
+                            try:
+                                listing = {
+                                    "name": i["item"]["name"],
+                                    "description": i["item"]["description"],
+                                    "price": i["item"]["price"] + " " + i["item"]["priceCurrency"] if i["item"]["price"] else "Undisclosed",
+                                    "address": i["item"]["availableAtOrFrom"]["address"]["streetAddress"],
+                                    "locality": i["item"]["availableAtOrFrom"]["address"]["addressLocality"],
+                                    "region": i["item"]["availableAtOrFrom"]["address"]["addressRegion"],
+                                    "url": url + i["item"]["url"],
+                                    "image": i["item"]["image"],
+                                }
+                            except:
+                                listing = {
+                                    "name": i["name"],
+                                    "description": i["description"],
+                                    "price": i["price"] + " " + i["priceCurrency"] if i["price"] else "Undisclosed",
+                                    "address": i["availableAtOrFrom"]["address"]["streetAddress"],
+                                    "locality": i["availableAtOrFrom"]["address"]["addressLocality"],
+                                    "region": i["availableAtOrFrom"]["address"]["addressRegion"],
+                                    "url": url + i["url"],
+                                    "image": i["image"],
+                                }
+
+                            if listing not in listings:
+                                listings.append(listing)
+        else:
+            for key, values in sale_data[0].items():
+                if key == 'about':
+                    for i in values:
+                        if i["item"]["availableAtOrFrom"]["address"]["addressLocality"] not in location:
+                            pass
+                        else:
+
                             listing = {
                                 "name": i["item"]["name"],
                                 "description": i["item"]["description"],
-                                "price": i["item"]["price"] + " " + i["item"]["priceCurrency"] if i["item"]["price"] else "N/A",
                                 "address": i["item"]["availableAtOrFrom"]["address"]["streetAddress"],
                                 "locality": i["item"]["availableAtOrFrom"]["address"]["addressLocality"],
                                 "region": i["item"]["availableAtOrFrom"]["address"]["addressRegion"],
                                 "url": url + i["item"]["url"],
                                 "image": i["item"]["image"],
+                                # "price": i["item"]["price"] + " " + i["item"]["priceCurrency"],
                             }
-                        except:
-                            listing = {
-                                "name": i["name"],
-                                "description": i["description"],
-                                "price": i["price"] + " " + i["priceCurrency"] if i["price"] else "N/A",
-                                "address": i["availableAtOrFrom"]["address"]["streetAddress"],
-                                "locality": i["availableAtOrFrom"]["address"]["addressLocality"],
-                                "region": i["availableAtOrFrom"]["address"]["addressRegion"],
-                                "url": url + i["url"],
-                                "image": i["image"],
-                            }
-
-                        if listing not in listings:
-                            listings.append(listing)
-        else:
-            for key, values in sale_data[0].items():
-                # print(f"key: {key}...")
-                # print(f"values: {values}...")
-                if key == 'about':
-                    for i in values:
-                        # print(f"i: {i}...")
-                        listing = {
-                            "name": i["item"]["name"],
-                            "description": i["item"]["description"],
-                            "address": i["item"]["availableAtOrFrom"]["address"]["streetAddress"],
-                            "locality": i["item"]["availableAtOrFrom"]["address"]["addressLocality"],
-                            "region": i["item"]["availableAtOrFrom"]["address"]["addressRegion"],
-                            "url": url + i["item"]["url"],
-                            "image": i["item"]["image"],
-                            # "price": i["item"]["price"] + " " + i["item"]["priceCurrency"],
-                        }
-                        if listing not in listings:
-                            listings.append(listing)
+                            if listing not in listings:
+                                listings.append(listing)
 
 
 
-        print(f"Listings showcase: {listings}...")
+        print(f"Listings showcase: {listings}Listings showcase...\n\n")
         return listings
 
     except Exception as e:
@@ -197,7 +196,7 @@ def scrape_showcase(search_type, category, location):
 def replace_spaces_and_commas(string):
     # Split the string into words
     words = string.split()
-    print(f"words: {words}...")
+
 
     # If there are exactly two words
     if len(words) == 2:
@@ -221,10 +220,7 @@ def replace_spaces_and_commas(string):
         new_string = string.replace(",", "-")
 
     if new_string[0] == "/":
-        print(f"new stirng = {new_string}")
         # remove it
         new_string = new_string[1] + new_string[2:]
-
-    print(f"new stirng = {new_string}")
 
     return new_string

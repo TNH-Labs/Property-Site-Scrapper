@@ -16,9 +16,6 @@ def scrape_loopnet(search_type, category, location):
     try:
         # Perform scraping based on the selected search type and form data
         print("\n\nScraping LoopNet...")
-        print(f"Search type: {search_type}")
-        print(f"Property name: {category}")
-        print(f"Location: {location}\n\n")
         category_mappings = {
             'forLease': {
                 'Coworking': 'coworking-space',
@@ -112,7 +109,6 @@ def scrape_loopnet(search_type, category, location):
                 return None
 
         category_name = get_value_by_type_and_key(search_type, category)
-        print(f"category_name loopnet: {category_name}")
 
 
         # Construct the URL
@@ -127,10 +123,8 @@ def scrape_loopnet(search_type, category, location):
 
         # print(f"Scraping {url}...")
         url = replace_spaces_and_commas(url)
-        # print(f"Scraping {url}...")
 
 
-        print("Before response...")
         # Make the request with the selected proxy and parameters
         client = ZenRowsClient("8cb92d04c60beddcb5a5f13c119f96f566525144")
         # url = "https://www.loopnet.com/"
@@ -138,23 +132,15 @@ def scrape_loopnet(search_type, category, location):
 
         response = client.get(url, params=params)
 
-        # print(response.text)
-        # print("After response...")
         response.raise_for_status()
 
 
         json_data = json.loads("".join(response.text))
         modified_data = remove_at_symbols(json_data)
 
-        # print(f"modified_data: {modified_data[2]}\n\n..............................")
-
-        # print(f"modified_data: {modified_data}\n\n")
-
         listings = []
-        csv_listings = []
         item = modified_data[1]
 
-        # print(f"search_type: {search_type}\n\n")
 
 
 
@@ -162,13 +148,9 @@ def scrape_loopnet(search_type, category, location):
             if item:
                 # print(f"item: {item}\n\n")
                 for key, value in item.items():
-                    # print(f"Key: {key}\n\n")
-                    # print(f"Value: {value}\n\n")
                     if key == 'about':
-                        # print(f"Value: {value}\n\n")
                         try:
                             for i in value:
-                                # print(f"i: {i}\n\n")
                                 for key, value in i['item'].items():
                                     if 'availableAtOrFrom' in i['item']:
                                         if 'address' in i['item']['availableAtOrFrom']:
@@ -177,6 +159,94 @@ def scrape_loopnet(search_type, category, location):
                                                 locality = i['item']['availableAtOrFrom']['address']['addressLocality']
                                                 region = i['item']['availableAtOrFrom']['address']['addressRegion']
                                                 # print(f"i val: {address}\n\n")
+                                                if locality not in location:
+                                                    pass
+                                                else:
+                                                    listing = {
+                                                        'name': i['item']['name'],
+                                                        'description': i['item']['description'],
+                                                        'price': "undisclosed",
+                                                        'url': i['item']['url'],
+                                                        'image': i['item']['image'],
+                                                        'address': address,
+                                                        'locality': locality,
+                                                        'region': region
+                                                    }
+                                                    if listing not in listings:
+                                                        listings.append(listing)
+                        except:
+                            address = value['availableAtOrFrom']['address']['streetAddress']
+                            locality = value['availableAtOrFrom']['address']['addressLocality']
+                            region = value['availableAtOrFrom']['address']['addressRegion']
+                            # print(f"i val: {address}\n\n")
+                            if locality not in location:
+                                pass
+                            else:
+                                listing = {
+                                    'name': value['name'],
+                                    'description': value['description'],
+                                    'price': "undisclosed",
+                                    'url': value['url'],
+                                    'image': value['image'],
+                                    'address': address,
+                                    'locality': locality,
+                                    'region': region
+                                }
+                                if listing not in listings:
+                                    listings.append(listing)
+
+
+        elif search_type == 'auction':
+            if modified_data:
+                for item in modified_data:
+                    for key, value in item.items():
+                        # print(f"Key: {key}\n\n")
+                        if key == 'about':
+                            # print(f"Value: {value}\n\n")
+                            for i in value:
+                                # print(f"i: {i}\n\n")
+                                if i['item']['availableAtOrFrom']['address']['addressLocality'] not in location:
+                                    pass
+                                else:
+                                    for key, value in i['item'].items():
+                                        listing = {
+                                        'type': i['item']['type'],
+                                        'name': i['item']['name'],
+                                        'description': i['item']['description'],
+                                            'price': "undisclosed",
+                                        'url': i['item']['url'],
+                                        'image': i['item']['image'],
+                                        'category': i['item']['category'],
+                                        'address': i['item']['availableAtOrFrom']['address']['streetAddress'],
+                                        'locality': i['item']['availableAtOrFrom']['address']['addressLocality'],
+                                        'region': i['item']['availableAtOrFrom']['address']['addressRegion'],
+                                        'offered_by': i['item']['offeredBy'][0]['name'],
+                                        'offered_by_job_title': i['item']['offeredBy'][0]['jobTitle'],
+                                        'works_for': i['item']['offeredBy'][0]['worksFor']['name']
+                                        }
+                                        if listing not in listings:
+                                            listings.append(listing)
+        elif search_type == 'BBSType':
+            listings = BBS(modified_data[3])
+
+        if listings == [] and search_type == 'forLease' or search_type == 'forSale':
+            for key, value in modified_data[2].items():
+                if key == 'about':
+                    # print(f"Value: {value}\n\n")
+                    try:
+                        for i in value:
+                            # print(f"i: {i}\n\n")
+                            for key, value in i['item'].items():
+                                if 'availableAtOrFrom' in i['item']:
+                                    if 'address' in i['item']['availableAtOrFrom']:
+                                        if 'streetAddress' in i['item']['availableAtOrFrom']['address']:
+                                            address = i['item']['availableAtOrFrom']['address']['streetAddress']
+                                            locality = i['item']['availableAtOrFrom']['address']['addressLocality']
+                                            region = i['item']['availableAtOrFrom']['address']['addressRegion']
+                                            # print(f"i val: {address}\n\n")
+                                            if locality not in location:
+                                                pass
+                                            else:
                                                 listing = {
                                                     'name': i['item']['name'],
                                                     'description': i['item']['description'],
@@ -189,11 +259,14 @@ def scrape_loopnet(search_type, category, location):
                                                 }
                                                 if listing not in listings:
                                                     listings.append(listing)
-                        except:
-                            address = value['availableAtOrFrom']['address']['streetAddress']
-                            locality = value['availableAtOrFrom']['address']['addressLocality']
-                            region = value['availableAtOrFrom']['address']['addressRegion']
-                            # print(f"i val: {address}\n\n")
+                    except:
+                        address = value['availableAtOrFrom']['address']['streetAddress']
+                        locality = value['availableAtOrFrom']['address']['addressLocality']
+                        region = value['availableAtOrFrom']['address']['addressRegion']
+                        # print(f"i val: {address}\n\n")
+                        if locality not in location:
+                            pass
+                        else:
                             listing = {
                                 'name': value['name'],
                                 'description': value['description'],
@@ -208,85 +281,7 @@ def scrape_loopnet(search_type, category, location):
                                 listings.append(listing)
 
 
-        elif search_type == 'auction':
-            if modified_data:
-                for item in modified_data:
-                    for key, value in item.items():
-                        # print(f"Key: {key}\n\n")
-                        if key == 'about':
-                            # print(f"Value: {value}\n\n")
-                            for i in value:
-                                # print(f"i: {i}\n\n")
-                                for key, value in i['item'].items():
-                                    listing = {
-                                    'type': i['item']['type'],
-                                    'name': i['item']['name'],
-                                    'description': i['item']['description'],
-                                        'price': "undisclosed",
-                                    'url': i['item']['url'],
-                                    'image': i['item']['image'],
-                                    'category': i['item']['category'],
-                                    'address': i['item']['availableAtOrFrom']['address']['streetAddress'],
-                                    'locality': i['item']['availableAtOrFrom']['address']['addressLocality'],
-                                    'region': i['item']['availableAtOrFrom']['address']['addressRegion'],
-                                    'offered_by': i['item']['offeredBy'][0]['name'],
-                                    'offered_by_job_title': i['item']['offeredBy'][0]['jobTitle'],
-                                    'works_for': i['item']['offeredBy'][0]['worksFor']['name']
-                                    }
-                                    if listing not in listings:
-                                        listings.append(listing)
-        elif search_type == 'BBSType':
-            listings = BBS(modified_data[3])
-
-        if listings == [] and search_type == 'forLease' or search_type == 'forSale':
-            for key, value in modified_data[2].items():
-                # print(f"Key: {key}\n\n")
-                # print(f"Value: {value}\n\n")
-                if key == 'about':
-                    # print(f"Value: {value}\n\n")
-                    try:
-                        for i in value:
-                            # print(f"i: {i}\n\n")
-                            for key, value in i['item'].items():
-                                if 'availableAtOrFrom' in i['item']:
-                                    if 'address' in i['item']['availableAtOrFrom']:
-                                        if 'streetAddress' in i['item']['availableAtOrFrom']['address']:
-                                            address = i['item']['availableAtOrFrom']['address']['streetAddress']
-                                            locality = i['item']['availableAtOrFrom']['address']['addressLocality']
-                                            region = i['item']['availableAtOrFrom']['address']['addressRegion']
-                                            # print(f"i val: {address}\n\n")
-                                            listing = {
-                                                'name': i['item']['name'],
-                                                'description': i['item']['description'],
-                                                'price': "undisclosed",
-                                                'url': i['item']['url'],
-                                                'image': i['item']['image'],
-                                                'address': address,
-                                                'locality': locality,
-                                                'region': region
-                                            }
-                                            if listing not in listings:
-                                                listings.append(listing)
-                    except:
-                        address = value['availableAtOrFrom']['address']['streetAddress']
-                        locality = value['availableAtOrFrom']['address']['addressLocality']
-                        region = value['availableAtOrFrom']['address']['addressRegion']
-                        # print(f"i val: {address}\n\n")
-                        listing = {
-                            'name': value['name'],
-                            'description': value['description'],
-                            'price': "undisclosed",
-                            'url': value['url'],
-                            'image': value['image'],
-                            'address': address,
-                            'locality': locality,
-                            'region': region
-                        }
-                        if listing not in listings:
-                            listings.append(listing)
-
-
-        print(f"listings: {listings}\n\n")
+        print(f"data of Loopnet: {listings}data of Loopnet\n\n")
         return listings
     except:
         print("Error in loopnet.py")
@@ -297,19 +292,13 @@ def BBS(response):
     listings = []
     csv_listings = []
     bbs = response
-    # print(f"bbs: {bbs}\n\n")
-    # print(f"url: {url}\n\n")
-    # print(f"bbs: {bbs}\n\n")
-    print("-------------------------------------------end bbs-------------------------------------------")
+
     for key, value in bbs.items():
             # print(f"key: {key}\n\n")
             # print(f"value: {value}\n\n")
             if key == 'csr':
                 for i in value:
-
-                    # for kii, vii in i.items():
-                    # print(f"vii: {vii}\n\n")
-                    # print(f"kii: {kii}\n\n")
+                    print(i['location'], "loopnet bus location")
                     try:
                         listing = {
                             'url':url + i['urlStub'],
@@ -339,7 +328,6 @@ def BBS(response):
                         listings.append(listing)
 
 
-    print(f"\n\nListings loopnet:", listings)
     return listings
 
 def remove_at_symbols(obj):
