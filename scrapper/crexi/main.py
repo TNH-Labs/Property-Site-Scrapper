@@ -218,9 +218,36 @@ def scrape_crexi(location, category, search_type):
         path2 = ''
         links = "//a[@class='cover-link']"
         ree = "//crx-property-tile-aggregate[@class='ng-star-inserted']"
-        pics = ""
+        pics = "//img[@class='  ng-lazyloaded']"
         link = driver.find_elements(By.XPATH, ree)
         links = driver.find_elements(By.XPATH, links)
+        pics = driver.find_elements(By.XPATH, pics)
+        # line to check which one len is smallest
+        check = min(len(link), len(links), len(pics))
+        print(f"check: {check}")
+        print(f"link: {len(link)}")
+        print(f"links: {len(links)}")
+        print(f"pics: {len(pics)}")
+        # create a loop for the smallest len\
+        results = []
+        sample = []
+        for i in range(check):
+            # print(f"i: {link[i].text}")
+            # print(f"i: {links[i].get_attribute('href')}")
+            # print(f"i: {pics[i].get_attribute('src')}")
+            sample.append(link[i].text.strip(" ").split("\n"))
+            results.append({
+                'title': link[i].text.strip(),
+                'link': links[i].get_attribute('href'),
+                'image': pics[i].get_attribute('src')
+            })
+            cc = parse_list(link[i].text, location)
+            print(f"cc: {cc}")
+
+        print(f"sample: {sample}....")
+        print("done....")
+        print(f"results: {results}....")
+        """
         if len(link) == len(links):
             for i in range(len(link)):
                 print(f"i: {link[i].text}")
@@ -230,6 +257,8 @@ def scrape_crexi(location, category, search_type):
         elif len(link) < len(links):
             for i in range(len(link)):
                 print(f"i: {link[i].text}")
+
+
 
         # Find the container element that holds the listings
         listings_container = soup.find('crx-search-results')
@@ -274,7 +303,7 @@ def scrape_crexi(location, category, search_type):
                     }
 
                     item_data.append(item)
-
+        """
         # Print the item details
         """
         for item in item_data:
@@ -294,9 +323,9 @@ def scrape_crexi(location, category, search_type):
         # Close the browser
         driver.quit()
 
-        print(f"listings Crexi: {item_data}listings Crexi\n\n")
+        # print(f"listings Crexi: {item_data}listings Crexi\n\n")
 
-        return item_data
+        return results
     except Exception as e:
         driver.quit()
         print(e)
@@ -308,3 +337,51 @@ def replace_spaces_and_commas(string):
     # Replace commas with dashes
     string = string.replace(",", "-")
     return string
+
+
+def parse_list(list_data, location):
+    parsed_data = []
+    for item in list_data:
+        item_data = item.strip("'").split("\n")
+        print(f"item_data: {item_data}....")
+        if True:
+            print(f"checking something: {item_data[1].strip(' ').split(',')[-3]}")
+            if item_data[1].strip(" ").split(",")[-3] not in location:
+                pass
+            else:
+
+                if item_data[1][1] == '$' or item_data[3] == 'Contact for pricing':
+
+                    parsed_item = {
+                        "name": item_data[2],
+                        "description": item_data[-4],
+                        "price": item_data[1] if item_data[1][1] == '$' else "Undisclosed",
+                        "address": item_data[-5],
+                        "locality": item_data[1].strip(" ").split(",")[-2],
+                        "region": item_data[1].strip(" ").split(",")[-1],
+                    }
+                elif item_data[3][0] != '$' or item_data[3] != 'Contact for pricing':
+                    try:
+
+                        parsed_item = {
+                            "name": item_data[1],
+                            "description": item_data[2],
+                            "price": "Undisclosed",
+                            "address": item_data[3],
+                            "locality": item_data[3].strip(" ").split(",")[-2],
+                            "region": item_data[1].strip(" ").split(",")[-1],
+                        }
+                    except:
+                        parsed_item = {
+                            "name": item_data[1],
+                            "description": item_data[2],
+                            "price": "Undisclosed",
+                            "address": item_data[3],
+                            "locality": item_data[3].strip(" ").split(",")[-2],
+                            "region": item_data[1].strip(" ").split(",")[-1],
+                        }
+
+                parsed_data.append(parsed_item)
+    print(f"Response of PropertySharks {parsed_data}Response of PropertySharks\n\n"
+          f"")
+    return parsed_data
