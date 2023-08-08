@@ -241,12 +241,13 @@ def scrape_crexi(location, category, search_type):
                 'link': links[i].get_attribute('href'),
                 'image': pics[i].get_attribute('src')
             })
-            cc = parse_list(link[i].text, location)
-            print(f"cc: {cc}")
+
 
         print(f"sample: {sample}....")
         print("done....")
         print(f"results: {results}....")
+        l = parse_list(sample, location)
+        print(f"l: {l}....")
         """
         if len(link) == len(links):
             for i in range(len(link)):
@@ -339,49 +340,44 @@ def replace_spaces_and_commas(string):
     return string
 
 
-def parse_list(list_data, location):
+def parse_list(list_dat, location):
     parsed_data = []
-    for item in list_data:
-        item_data = item.strip("'").split("\n")
+    parsed_item = {}
+    for item_data in list_dat:
+        # item_data = item.strip("'").split("\n")
         print(f"item_data: {item_data}....")
-        if True:
-            print(f"checking something: {item_data[1].strip(' ').split(',')[-3]}")
-            if item_data[1].strip(" ").split(",")[-3] not in location:
+        print(f"------------------{item_data[5].strip(' ').split(',')[0]}")
+        print(f"------------------{location}")
+        if item_data[1][1] == '$':
+            if item_data[5].strip(" ").split(",")[0] not in location:
                 pass
             else:
-
-                if item_data[1][1] == '$' or item_data[3] == 'Contact for pricing':
-
+                    print(f"checking something: {item_data[5].strip(' ').split(',')}")
+                    print(f"checking something: {item_data[5].strip(' ').split(',')[0]}")
                     parsed_item = {
                         "name": item_data[2],
-                        "description": item_data[-4],
+                        "description": item_data[4],
                         "price": item_data[1] if item_data[1][1] == '$' else "Undisclosed",
-                        "address": item_data[-5],
-                        "locality": item_data[1].strip(" ").split(",")[-2],
+                        "address": item_data[5],
+                        "locality": item_data[1].strip(" ").split(",")[0],
                         "region": item_data[1].strip(" ").split(",")[-1],
                     }
-                elif item_data[3][0] != '$' or item_data[3] != 'Contact for pricing':
-                    try:
 
-                        parsed_item = {
-                            "name": item_data[1],
-                            "description": item_data[2],
-                            "price": "Undisclosed",
-                            "address": item_data[3],
-                            "locality": item_data[3].strip(" ").split(",")[-2],
-                            "region": item_data[1].strip(" ").split(",")[-1],
-                        }
-                    except:
-                        parsed_item = {
-                            "name": item_data[1],
-                            "description": item_data[2],
-                            "price": "Undisclosed",
-                            "address": item_data[3],
-                            "locality": item_data[3].strip(" ").split(",")[-2],
-                            "region": item_data[1].strip(" ").split(",")[-1],
-                        }
+        else:
+            if item_data[5].strip(" ").split(",")[0] not in location:
+                pass
+            else:
+                parsed_item = {
+                    "name": item_data[1],
+                    "description": item_data[3],
+                    "price": item_data[0] if item_data[1][1] == '$' else "Undisclosed",
+                    "address": item_data[4],
+                    "locality": item_data[4].strip(" ").split(",")[0],
+                    "region": item_data[4].strip(" ").split(",")[-1],
+                }
 
-                parsed_data.append(parsed_item)
+
+        parsed_data.append(parsed_item)
     print(f"Response of PropertySharks {parsed_data}Response of PropertySharks\n\n"
           f"")
     return parsed_data
