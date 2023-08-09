@@ -348,24 +348,49 @@ def parse_list(list_dat, location):
         print(f"item_data: {item_data}....")
         print(f"------------------{item_data[5].strip(' ').split(',')[0]}")
         print(f"------------------{location}")
-        if item_data[1][1] == '$':
-            if item_data[5].strip(" ").split(",")[0] not in location:
-                pass
+        print(f"------------------{item_data[1][0]}")
+        print(f"------------------{item_data[1]}")
+        if item_data[1][0] == '$' or item_data[1][0:1].lower() == "un":
+            if len(location) != 2:
+                if item_data[5].strip(" ").split(",")[0] not in location:
+                    pass
+                else:
+                        print(f"checking something: {item_data[5].strip(' ').split(',')}")
+                        print(f"checking something: {item_data[5].strip(' ').split(',')[0]}")
+                        parsed_item = {
+                            "name": item_data[2],
+                            "description": item_data[4],
+                            "price": item_data[1] if item_data[1][1] == '$' else "Undisclosed",
+                            "address": item_data[5],
+                            "locality": item_data[5].strip(" ").split(",")[0],
+                            "region": item_data[5].strip(" ").split(",")[-1].strip(" ")[0:2],
+                        }
             else:
-                    print(f"checking something: {item_data[5].strip(' ').split(',')}")
-                    print(f"checking something: {item_data[5].strip(' ').split(',')[0]}")
-                    parsed_item = {
-                        "name": item_data[2],
-                        "description": item_data[4],
-                        "price": item_data[1] if item_data[1][1] == '$' else "Undisclosed",
-                        "address": item_data[5],
-                        "locality": item_data[1].strip(" ").split(",")[0],
-                        "region": item_data[1].strip(" ").split(",")[-1],
-                    }
+                print(f"checking something: {item_data[5].strip(' ').split(',')}")
+                print(f"checking something: {item_data[5].strip(' ').split(',')[0]}")
+                parsed_item = {
+                    "name": item_data[2],
+                    "description": item_data[4],
+                    "price": item_data[1] if item_data[1][1] == '$' else "Undisclosed",
+                    "address": item_data[5],
+                    "locality": item_data[5].strip(" ").split(",")[0],
+                    "region": item_data[5].strip(" ").split(",")[-1].strip(" ")[0:2],
+                }
 
-        else:
-            if item_data[5].strip(" ").split(",")[0] not in location:
-                pass
+
+        elif item_data[0][0] != '$' or item_data[0][0:1].lower() == "un":
+            if len(location) != 2:
+                if item_data[5].strip(" ").split(",")[0] not in location:
+                    pass
+                else:
+                    parsed_item = {
+                        "name": item_data[1],
+                        "description": item_data[3],
+                        "price": item_data[0] if item_data[1][1] == '$' else "Undisclosed",
+                        "address": item_data[4],
+                        "locality": item_data[4].strip(" ").split(",")[0],
+                        "region": item_data[4].strip(" ").split(",")[-1].strip(" ")[0:2],
+                    }
             else:
                 parsed_item = {
                     "name": item_data[1],
@@ -373,7 +398,7 @@ def parse_list(list_dat, location):
                     "price": item_data[0] if item_data[1][1] == '$' else "Undisclosed",
                     "address": item_data[4],
                     "locality": item_data[4].strip(" ").split(",")[0],
-                    "region": item_data[4].strip(" ").split(",")[-1],
+                    "region": item_data[4].strip(" ").split(",")[-1].strip(" ")[0:2],
                 }
 
 
