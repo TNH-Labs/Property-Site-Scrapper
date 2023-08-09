@@ -242,12 +242,8 @@ def scrape_crexi(location, category, search_type):
                 'image': pics[i].get_attribute('src')
             })
 
-
-        print(f"sample: {sample}....")
-        print("done....")
-        print(f"results: {results}....")
-        l = parse_list(sample, location)
-        print(f"l: {l}....")
+        results = parse_list(sample, location)
+        print(f"results: {results}")
         """
         if len(link) == len(links):
             for i in range(len(link)):
