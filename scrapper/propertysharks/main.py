@@ -168,7 +168,7 @@ def scrape_propertysharks(search_type, category, location):
         xpath = "//div//ul[@class='listings']/li"
 
 
-        wait = WebDriverWait(driver, 10)
+        wait = WebDriverWait(driver, 15)
         listing_element = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
         # print(f"Found {listing_element} listing element")
 
@@ -190,7 +190,7 @@ def scrape_propertysharks(search_type, category, location):
         scroll = driver.find_element(By.XPATH, "//div[@class='inner']")
         project_links = listing_element.find_elements(By.XPATH, "//div//ul[@class='listings']//li[@class='property-details property-details-basic']")
 
-        time.sleep(5)
+        time.sleep(10)
         scroll_to_element(driver, scroll)
 
         # Find all elements matching the XPath expression
@@ -212,7 +212,6 @@ def scrape_propertysharks(search_type, category, location):
             hrefs.append(url.get_attribute("href"))
 
         result = parse_list(listings, location)
-
 
         result = update_result(result, hrefs, srcs)
 
@@ -236,7 +235,7 @@ def parse_list(list_data, location):
     for item in list_data:
         item_data = item.strip("'").split("\n")
         if len(item_data) >= 7:
-            if item_data[1].strip(" ").split(",")[-2] not in location:
+            if item_data[1].strip(" ").split(",")[-2] not in location and len(location) > 2:
                 pass
             else:
 

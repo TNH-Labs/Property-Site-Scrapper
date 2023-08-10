@@ -224,10 +224,6 @@ def scrape_crexi(location, category, search_type):
         pics = driver.find_elements(By.XPATH, pics)
         # line to check which one len is smallest
         check = min(len(link), len(links), len(pics))
-        print(f"check: {check}")
-        print(f"link: {len(link)}")
-        print(f"links: {len(links)}")
-        print(f"pics: {len(pics)}")
         # create a loop for the smallest len\
         results = []
         sample = []
@@ -340,12 +336,6 @@ def parse_list(list_dat, location):
     parsed_data = []
     parsed_item = {}
     for item_data in list_dat:
-        # item_data = item.strip("'").split("\n")
-        print(f"item_data: {item_data}....")
-        print(f"------------------{item_data[5].strip(' ').split(',')[0]}")
-        print(f"------------------{location}")
-        print(f"------------------{item_data[1][0]}")
-        print(f"------------------{item_data[1]}")
         if item_data[1][0] == '$' or item_data[1][0:1].lower() == "un":
             if len(location) != 2:
                 if item_data[5].strip(" ").split(",")[0] not in location:
@@ -362,8 +352,6 @@ def parse_list(list_dat, location):
                             "region": item_data[5].strip(" ").split(",")[-1].strip(" ")[0:2],
                         }
             else:
-                print(f"checking something: {item_data[5].strip(' ').split(',')}")
-                print(f"checking something: {item_data[5].strip(' ').split(',')[0]}")
                 parsed_item = {
                     "name": item_data[2],
                     "description": item_data[4],
@@ -402,3 +390,5 @@ def parse_list(list_dat, location):
     print(f"Response of PropertySharks {parsed_data}Response of PropertySharks\n\n"
           f"")
     return parsed_data
+
+

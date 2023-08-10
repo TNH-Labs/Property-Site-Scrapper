@@ -159,7 +159,7 @@ def scrape_loopnet(search_type, category, location):
                                                 locality = i['item']['availableAtOrFrom']['address']['addressLocality']
                                                 region = i['item']['availableAtOrFrom']['address']['addressRegion']
                                                 # print(f"i val: {address}\n\n")
-                                                if locality not in location:
+                                                if locality not in location and len(location) > 2:
                                                     pass
                                                 else:
                                                     listing = {
@@ -179,7 +179,7 @@ def scrape_loopnet(search_type, category, location):
                             locality = value['availableAtOrFrom']['address']['addressLocality']
                             region = value['availableAtOrFrom']['address']['addressRegion']
                             # print(f"i val: {address}\n\n")
-                            if locality not in location:
+                            if locality not in location and len(location) > 2:
                                 pass
                             else:
                                 listing = {
@@ -205,7 +205,7 @@ def scrape_loopnet(search_type, category, location):
                             # print(f"Value: {value}\n\n")
                             for i in value:
                                 # print(f"i: {i}\n\n")
-                                if i['item']['availableAtOrFrom']['address']['addressLocality'] not in location:
+                                if i['item']['availableAtOrFrom']['address']['addressLocality'] not in location and len(location) > 2:
                                     pass
                                 else:
                                     for key, value in i['item'].items():
@@ -244,7 +244,7 @@ def scrape_loopnet(search_type, category, location):
                                             locality = i['item']['availableAtOrFrom']['address']['addressLocality']
                                             region = i['item']['availableAtOrFrom']['address']['addressRegion']
                                             # print(f"i val: {address}\n\n")
-                                            if locality not in location:
+                                            if locality not in location and len(location) > 2:
                                                 pass
                                             else:
                                                 listing = {
@@ -264,7 +264,7 @@ def scrape_loopnet(search_type, category, location):
                         locality = value['availableAtOrFrom']['address']['addressLocality']
                         region = value['availableAtOrFrom']['address']['addressRegion']
                         # print(f"i val: {address}\n\n")
-                        if locality not in location:
+                        if locality not in location and len(location) > 2:
                             pass
                         else:
                             listing = {

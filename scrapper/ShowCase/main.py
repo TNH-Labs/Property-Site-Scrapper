@@ -128,13 +128,7 @@ def scrape_showcase(search_type, category, location):
                 if key == 'about':
                     # print(f"values: {values}...")
                     for i in values:
-                        # print(f"i: {i}...")
-                        if i["item"]["availableAtOrFrom"]["address"]["addressLocality"] not in location:
-                            print("Not in location...")
-                        else:
-                            print("In location...")
-
-                        if i["item"]["availableAtOrFrom"]["address"]["addressLocality"] not in location:
+                        if i["item"]["availableAtOrFrom"]["address"]["addressLocality"] not in location and len(location) > 2:
                             pass
                         else:
                             try:
@@ -166,7 +160,7 @@ def scrape_showcase(search_type, category, location):
             for key, values in sale_data[0].items():
                 if key == 'about':
                     for i in values:
-                        if i["item"]["availableAtOrFrom"]["address"]["addressLocality"] not in location:
+                        if i["item"]["availableAtOrFrom"]["address"]["addressLocality"] not in location and len(location) > 2:
                             pass
                         else:
 

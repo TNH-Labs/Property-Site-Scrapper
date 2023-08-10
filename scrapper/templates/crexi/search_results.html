@@ -17,7 +17,6 @@
                 <th>Title</th>
                 <th>Description</th>
                 <th>Address</th>
-                <th>View OM Button</th>
                 <th>Link</th>
             </tr>
         </thead>
@@ -30,7 +29,6 @@
                     <td>{{ item.title }}</td>
                     <td>{{ item.description }}</td>
                     <td>{{ item.address }}</td>
-                    <td>{% if item.view_om_button %}Available{% else %}Not Available{% endif %}</td>
                     <td><a href="{{ item.url }}" target="_blank">Link</a></td>
                 </tr>
                 {% endfor %}
