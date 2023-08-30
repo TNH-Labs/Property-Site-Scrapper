@@ -103,7 +103,7 @@ def scrape_showcase(search_type, category, location):
         else:
             url = f"https://www.showcase.com/{location}/{category_name}/for-rent/"
         # Make the request with the selected proxy and parameters
-        client = ZenRowsClient("8cb92d04c60beddcb5a5f13c119f96f566525144")
+        client = ZenRowsClient("c65ca2f68b59715e66e7dac29ddc7d40634ddc82")
         # url = "https://www.loopnet.com/"
         params = {"autoparse": "true"}
 

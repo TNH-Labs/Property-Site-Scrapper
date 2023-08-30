@@ -56,7 +56,7 @@ def scrape_crexi(location, category, search_type):
 
         try:
             # Wait for a maximum of 40 seconds for the page to be loaded completely
-            WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.XPATH, '//body')))
+            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.XPATH, '//body')))
             print("Page loaded successfully!")
         except TimeoutException:
             print("Timeout: Page took too long to load.")
@@ -336,6 +336,7 @@ def parse_list(list_dat, location):
     parsed_data = []
     parsed_item = {}
     for item_data in list_dat:
+        print(f"item_data: {item_data}")
         if item_data[1][0] == '$' or item_data[1][0:1].lower() == "un":
             if len(location) != 2:
                 if item_data[5].strip(" ").split(",")[0] not in location:
@@ -344,21 +345,21 @@ def parse_list(list_dat, location):
                         print(f"checking something: {item_data[5].strip(' ').split(',')}")
                         print(f"checking something: {item_data[5].strip(' ').split(',')[0]}")
                         parsed_item = {
-                            "name": item_data[2],
+                            "name": item_data[-3],
                             "description": item_data[4],
                             "price": item_data[1] if item_data[1][1] == '$' else "Undisclosed",
-                            "address": item_data[5],
-                            "locality": item_data[5].strip(" ").split(",")[0],
-                            "region": item_data[5].strip(" ").split(",")[-1].strip(" ")[0:2],
+                            "address": item_data[-2],
+                            "locality": item_data[-2].strip(" ").split(",")[0],
+                            "region": item_data[-2].strip(" ").split(",")[-1].strip(" ")[0:2],
                         }
             else:
                 parsed_item = {
-                    "name": item_data[2],
+                    "name": item_data[-3],
                     "description": item_data[4],
                     "price": item_data[1] if item_data[1][1] == '$' else "Undisclosed",
-                    "address": item_data[5],
-                    "locality": item_data[5].strip(" ").split(",")[0],
-                    "region": item_data[5].strip(" ").split(",")[-1].strip(" ")[0:2],
+                    "address": item_data[-2],
+                    "locality": item_data[-2].strip(" ").split(",")[0],
+                    "region": item_data[-2].strip(" ").split(",")[-1].strip(" ")[0:2],
                 }
 
 
@@ -371,23 +372,23 @@ def parse_list(list_dat, location):
                         "name": item_data[1],
                         "description": item_data[3],
                         "price": item_data[0] if item_data[1][1] == '$' else "Undisclosed",
-                        "address": item_data[4],
-                        "locality": item_data[4].strip(" ").split(",")[0],
-                        "region": item_data[4].strip(" ").split(",")[-1].strip(" ")[0:2],
+                        "address": item_data[-2],
+                        "locality": item_data[-2].strip(" ").split(",")[0],
+                        "region": item_data[-2].strip(" ").split(",")[-1].strip(" ")[0:2],
                     }
             else:
                 parsed_item = {
                     "name": item_data[1],
                     "description": item_data[3],
                     "price": item_data[0] if item_data[1][1] == '$' else "Undisclosed",
-                    "address": item_data[4],
-                    "locality": item_data[4].strip(" ").split(",")[0],
-                    "region": item_data[4].strip(" ").split(",")[-1].strip(" ")[0:2],
+                    "address": item_data[-2],
+                    "locality": item_data[-2].strip(" ").split(",")[0],
+                    "region": item_data[-2].strip(" ").split(",")[-1].strip(" ")[0:2],
                 }
 
 
         parsed_data.append(parsed_item)
-    print(f"Response of PropertySharks {parsed_data}Response of PropertySharks\n\n"
+    print(f"Response of Crexi {parsed_data}Response of Crexi\n\n"
           f"")
     return parsed_data
 
