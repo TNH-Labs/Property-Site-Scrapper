@@ -13,7 +13,7 @@ from ..CSV import save_dict_to_csv
 
 
 def scrape_loopnet(search_type, category, location):
-    try:
+    # try:
         # Perform scraping based on the selected search type and form data
         print("\n\nScraping LoopNet...")
         category_mappings = {
@@ -112,6 +112,8 @@ def scrape_loopnet(search_type, category, location):
 
 
         # Construct the URL
+        if location[0] == " " or location == "-":
+            location = location[1:]
         if search_type == 'forLease':
             url = f"https://www.loopnet.com/search/{category_name}/{location}/for-lease/"
         elif search_type == 'forSale':
@@ -122,11 +124,14 @@ def scrape_loopnet(search_type, category, location):
             url = f"https://www.loopnet.com/search/commercial-real-estate/{location.lower()}/auctions/"
 
         # print(f"Scraping {url}...")
+        print("\n\n\nloop",url.strip(" "), "loop\n\n\n")
+
         url = replace_spaces_and_commas(url)
 
 
+
         # Make the request with the selected proxy and parameters
-        client = ZenRowsClient("c65ca2f68b59715e66e7dac29ddc7d40634ddc82")
+        client = ZenRowsClient("234a4ab4fa98f11dc1686693ca7d3619303c1c76")
         # url = "https://www.loopnet.com/"
         params = {"autoparse": "true"}
 
@@ -143,7 +148,7 @@ def scrape_loopnet(search_type, category, location):
 
 
 
-
+        print(f"item: {item}\n\n")
         if search_type == 'forLease' or search_type == 'forSale':
             if item:
                 # print(f"item: {item}\n\n")
@@ -283,9 +288,9 @@ def scrape_loopnet(search_type, category, location):
 
         print(f"data of Loopnet: {listings}data of Loopnet\n\n")
         return listings
-    except:
-        print("Error in loopnet.py")
-        pass
+    # except:
+
+
 
 def BBS(response):
     url = "https://www.loopnet.com"
@@ -298,7 +303,7 @@ def BBS(response):
             # print(f"value: {value}\n\n")
             if key == 'csr':
                 for i in value:
-                    print(i['location'], "loopnet bus location")
+                    # print(i['location'], "loopnet bus location")
                     try:
                         listing = {
                             'url':url + i['urlStub'],
@@ -327,7 +332,7 @@ def BBS(response):
                     if listing not in listings:
                         listings.append(listing)
 
-
+    print(f"listings of loopnet: {listings}.....listings of loopnet\n\n")
     return listings
 
 def remove_at_symbols(obj):

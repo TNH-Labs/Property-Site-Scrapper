@@ -76,7 +76,7 @@ def scrape_crexi(location, category, search_type):
             pass
 
         # Wait for the search box to be clickable
-        search_box = WebDriverWait(driver, 20).until(
+        search_box = WebDriverWait(driver, 30).until(
             EC.element_to_be_clickable((By.XPATH,
                                         "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-header/crx-header-content/div/div[1]/crx-header-typeahead-search/crx-mobile-search/div/div[4]/div/div/crx-search-bar-pills/form/div"))
         )
@@ -86,13 +86,13 @@ def scrape_crexi(location, category, search_type):
         # Click on the search box using JavaScript
         driver.execute_script("arguments[0].click();", search_box)
 
+        time.sleep(5)
+        location = location.replace(" ", "")
         driver.find_element(By.XPATH,
                             "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-header/crx-header-content/div/div[1]/crx-header-typeahead-search/crx-mobile-search/div/div[4]/div/div/crx-search-bar-pills/form/div/div/input").send_keys(
-            f"{location}")
-        time.sleep(1)
-
+            f"{location.strip('')}")
         pg.press('enter')
-        time.sleep(10)
+        time.sleep(5)
 
         # Replace the XPath with the correct one for your element
         element_xpath = "/html/body/crx-app/div/ng-component/crx-normal-page/div/crx-drawer/mat-drawer-container/mat-drawer-content/div/div/article/div/div/crx-search-grid-view/div/crx-search-grid/div/div/div[1]/crx-search-results/div/div"
@@ -165,7 +165,7 @@ def scrape_crexi(location, category, search_type):
                 driver.execute_script("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element)
 
         # Main XPath for the element containing the items
-        time.sleep(5)
+        time.sleep(35)
         pp = "//div[@class='cls-guard']"
         # Find the main element
 
@@ -239,7 +239,7 @@ def scrape_crexi(location, category, search_type):
             })
 
         results = parse_list(sample, location)
-        print(f"results: {results}")
+        # print(f"results: {results}")
         """
         if len(link) == len(links):
             for i in range(len(link)):
@@ -316,7 +316,7 @@ def scrape_crexi(location, category, search_type):
         # Close the browser
         driver.quit()
 
-        # print(f"listings Crexi: {item_data}listings Crexi\n\n")
+        print(f"listings Crexi: {results}listings Crexi\n\n")
 
         return results
     except Exception as e:
@@ -336,14 +336,14 @@ def parse_list(list_dat, location):
     parsed_data = []
     parsed_item = {}
     for item_data in list_dat:
-        print(f"item_data: {item_data}")
+        # print(f"item_data: {item_data}")
         if item_data[1][0] == '$' or item_data[1][0:1].lower() == "un":
             if len(location) != 2:
                 if item_data[5].strip(" ").split(",")[0] not in location:
                     pass
                 else:
-                        print(f"checking something: {item_data[5].strip(' ').split(',')}")
-                        print(f"checking something: {item_data[5].strip(' ').split(',')[0]}")
+                        # print(f"checking something: {item_data[5].strip(' ').split(',')}")
+                        # print(f"checking something: {item_data[5].strip(' ').split(',')[0]}")
                         parsed_item = {
                             "name": item_data[-3],
                             "description": item_data[4],

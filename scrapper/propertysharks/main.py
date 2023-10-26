@@ -31,6 +31,9 @@ global df_location
 
 
 def scrape_propertysharks(search_type, category, location_):
+        print(f"\n\n ....{location_.strip()}....\n\n")
+        lo = location_
+
 
         option = Options()
         # option.add_argument("--window-size=1920,1080")
@@ -46,7 +49,7 @@ def scrape_propertysharks(search_type, category, location_):
 
         driver = webdriver.Chrome("./chromedriver.exe", options=option)
         # Perform scraping based on the selected search type and form data
-        print("\n\nScraping propertysharks...")
+        # print("\n\nScraping propertysharks...")
 
         action = ActionChains(driver)
         category_mappings = {
@@ -124,7 +127,7 @@ def scrape_propertysharks(search_type, category, location_):
 
         print(f"url of propertyshark: {url}")
 
-        client = ZenRowsClient("c65ca2f68b59715e66e7dac29ddc7d40634ddc82")
+        client = ZenRowsClient("234a4ab4fa98f11dc1686693ca7d3619303c1c76")
         # url = "https://www.loopnet.com/"
         params = {"autoparse": "true"}
 
@@ -138,10 +141,20 @@ def scrape_propertysharks(search_type, category, location_):
 
 
         driver.get(url)
+
+        print(lo.strip(),"url strip\n\n")
+        ele = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.XPATH, '//input[@data-geoidfield="LocationGeoId"]')))
+        ele.clear()
+        time.sleep(2)
+        ele.send_keys(lo.strip())
+
+        driver.find_element(By.XPATH, '//button[@automationid="searchpage_search_button"]').click()
+
+
         try:
             # Wait for a maximum of 10 seconds for the page to be loaded completely
             WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.XPATH, '//body')))
-            print("Page loaded successfully!")
+            # print("Page loaded successfully!")
         except TimeoutException:
             print("Timeout: Page took too long to load.")
         time.sleep(1)
@@ -199,11 +212,6 @@ def scrape_propertysharks(search_type, category, location_):
         correct the xpath go more in depth below
         """
         fin_container = driver.find_elements(By.XPATH, xpath)
-        print(f"Found {len(fin_container)} listing elements")
-        for i in fin_container:
-            print(i)
-            print(i.text)
-            print(i.get_attribute("id"))
 
         lis = []
         srcs = []
@@ -243,11 +251,19 @@ def parse_list(list_data, location):
     parsed_item = {}
     for item in list_data:
         item_data = item.strip("'").split("\n")
-        print(f"item data: {item_data}............\n\n")
+        # print(f"item data: {item_data}............\n\n")
         if len(item_data) >= 7:
             # try:
                 if item_data[1].strip(" ").split(",")[-2] not in df_location:
-                    print(f"location not there: {item_data}======{location}======-==-=")
+                    # print(f"location not there: {item_data}======{location}======-==-=")
+                    parsed_item = {
+                        "name": item_data[0],
+                        "description": item_data[5],
+                        "price": item_data[3] if item_data[3][1] == '$' else "Undisclosed",
+                        "address": item_data[1],
+                        "locality": item_data[1].strip(" ").split(",")[-2],
+                        "region": item_data[1].strip(" ").split(",")[-1],
+                    }
                 else:
 
                     if item_data[3][0] == '$' or item_data[3] == 'Contact for pricing':
@@ -260,7 +276,7 @@ def parse_list(list_data, location):
                             "locality": item_data[1].strip(" ").split(",")[-2],
                             "region": item_data[1].strip(" ").split(",")[-1],
                         }
-                        print(f"parsed item: {parsed_item}............\n\n")
+                        # print(f"parsed item: {parsed_item}............\n\n")
                     elif item_data[3][0] != '$' or item_data[3] != 'Contact for pricing':
                         try:
 
@@ -341,13 +357,13 @@ def replace_spaces_and_commas(string):
         # Reverse the order and join with a slash
         new_string = "/".join(words[::-1])
     elif len(words) > 2:
-        print(f"----{len(words)},{words}.")
+        # print(f"----{len(words)},{words}.")
         df_location = words[0:-1]
         if len(df_location) == 2:
             df_location = df_location[0] + " " + df_location[1]
         elif len(df_location) == 3:
             df_location = df_location[0] + " " + df_location[1] + " " + df_location[2]
-        print(f"df location: {df_location} > 2")
+        # print(f"df location: {df_location} > 2")
         # If there are more than two words, last one should go to first with '/' like 'word/' and rest having spaces should replaced with '-' so final string can be 'word/word-word'
         new_string = words[-1] + "/"
         for i in range(len(words) - 1):
@@ -374,15 +390,15 @@ def replace_spaces_and_commas(string):
     for i in df_location:
         if i == ',':
             df_location = df_location.replace(",", "")
-            print("replaced.")
+            # print("replaced.")
 
 
     # try:
     #     df_location = str(df_location[0] + " " + df_location[1])
     # except:
     #     df_location = str(df_location[0])
-    print(f"df location: {df_location}")
-    print(f"new stirng = {words}")
+    # print(f"df location: {df_location}")
+    # print(f"new stirng = {words}")
 
 
     return new_string

@@ -98,12 +98,16 @@ def scrape_showcase(search_type, category, location):
 
         location = replace_spaces_and_commas(location)
         # Construct the URL
+        print("\n\n------showcase------")
+        print(f"Location: {location}...")
+        print(f"Location: {len(location)}...")
+        print("------------\n\n")
         if search_type == 'forSale':
             url = f"https://www.showcase.com/{location}/{category_name}/for-sale/"
         else:
             url = f"https://www.showcase.com/{location}/{category_name}/for-rent/"
         # Make the request with the selected proxy and parameters
-        client = ZenRowsClient("c65ca2f68b59715e66e7dac29ddc7d40634ddc82")
+        client = ZenRowsClient("234a4ab4fa98f11dc1686693ca7d3619303c1c76")
         # url = "https://www.loopnet.com/"
         params = {"autoparse": "true"}
 

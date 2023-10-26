@@ -119,7 +119,7 @@ def loopnet(request):
 
         # Perform scraping using the form data
         scraped_data = scrape_loopnet(search_type, property_name, location)
-        print(f"Scraped data: {scraped_data}...")
+        # print(f"Scraped data: {scraped_data}...")
 
         request.session['scrapdata'] = scraped_data
         request.session['name'] = location
@@ -153,7 +153,7 @@ def showcase(request):
         elif search_type == 'forSale':
             property_name = request.POST.get('propertytypeforsale')
 
-        print(property_name, "property_name")
+        # print(property_name, "property_name")
 
         location = request.POST.get('geography')
 
@@ -209,10 +209,6 @@ def propertysharks(request):
             property_name = request.POST.get('propertytypeforsale')
 
         location = request.POST.get('geography')
-
-        print(location, "location")
-        print(property_name, "property_name")
-        print(search_type, "search_type")
 
         scraped_data = scrape_propertysharks(search_type, property_name, location)
         request.session['scrapdata'] = scraped_data
@@ -372,7 +368,6 @@ def search_at_once(request):
                                     pass
                                 else:
                                     updated_dict[key] = value.strip(" ")
-                        print(updated_dict, "updated_dict")
 
                         updated_data.append(updated_dict)
                 except:
@@ -389,7 +384,7 @@ def search_at_once(request):
         writer = csv.writer(response)
         writer.writerow(keys)  # add header row
         for row in updated_data:
-            print(row.values())
+            # print(row.values())
             writer.writerow(row.values())
         return response
     # Render the search form template for GET requests
